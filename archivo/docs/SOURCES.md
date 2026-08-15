@@ -12,12 +12,12 @@ comparacion de funciones publicitadas. La conclusion vigente esta en
 
 | Fuente | Hallazgo usado | Limite |
 |---|---|---|
-| [Evaluacion DNP del SNGRD 2018](../evidence/sources/DNP-evaluacion-SNGRD-2018.pdf) | Encuesta a 1.102 municipios (671 respuestas) y evidencia de capacidades bajas, informacion/financiacion rezagadas, poca materializacion en inversiones y falta de evaluacion sistematica de alternativas. | Diagnostico anterior a sistemas y reformas 2026; no prueba estado actual por si solo. |
-| [XVI seguimiento PNGRD 2015-2024](../evidence/sources/PNGRD-XVI-2015-2024.pdf) | Reportaron 804 municipios (73 %) y 13 sectores (72 %); resultados nacionales no siguen automaticamente la ejecucion de actividades. | Agregado nacional; no identifica causa del no reporte. |
-| [Estrategia de recuperacion 2025](../evidence/sources/Estrategia-Recuperacion-2025.pdf) | Reconoce seguimiento mecanico, PAE territoriales no compartidos, acciones sin lider/plan y necesidad de sistematizar/automatizar. | Tiene marca visible `BORRADOR`; no es politica adoptada. |
-| [Circular UNGRD 045 de 2026](../evidence/sources/Circular-045-PRT-2026.pdf) | El PRT Frente Frio tiene PMO, comite, mesa y herramienta tecnologica para avances, compromisos, fechas, alertas y datos presupuestales/contractuales. | Caso interno y especifico; no se verifico funcionalidad ni alcance transversal. |
-| [PAE San Andres 2021](../evidence/sources/PAE-SAN-ANDRES-2021.pdf) y [reporte sectorial 2022](../evidence/sources/PAE-SAI-REPORTE-2022.pdf) | Datos publicos reales con esquemas diferentes permiten probar extraccion y alineacion. | No prueban que IA hubiera evitado los problemas ni contienen el PAE 2026 final. |
-| [Vision Pais 2026](../evidence/sources/Vision-Pais-2026.pdf) | Metas futuras de interoperabilidad, conocimiento e interdependencias. | Compromiso/vision, no evidencia de entrega actual. |
+| [Evaluacion DNP del SNGRD 2018](../evidencia-fuentes/DNP-evaluacion-SNGRD-2018.pdf) | Encuesta a 1.102 municipios (671 respuestas) y evidencia de capacidades bajas, informacion/financiacion rezagadas, poca materializacion en inversiones y falta de evaluacion sistematica de alternativas. | Diagnostico anterior a sistemas y reformas 2026; no prueba estado actual por si solo. |
+| [XVI seguimiento PNGRD 2015-2024](../evidencia-fuentes/PNGRD-XVI-2015-2024.pdf) | Reportaron 804 municipios (73 %) y 13 sectores (72 %); resultados nacionales no siguen automaticamente la ejecucion de actividades. | Agregado nacional; no identifica causa del no reporte. |
+| [Estrategia de recuperacion 2025](../evidencia-fuentes/Estrategia-Recuperacion-2025.pdf) | Reconoce seguimiento mecanico, PAE territoriales no compartidos, acciones sin lider/plan y necesidad de sistematizar/automatizar. | Tiene marca visible `BORRADOR`; no es politica adoptada. |
+| [Circular UNGRD 045 de 2026](../evidencia-fuentes/Circular-045-PRT-2026.pdf) | El PRT Frente Frio tiene PMO, comite, mesa y herramienta tecnologica para avances, compromisos, fechas, alertas y datos presupuestales/contractuales. | Caso interno y especifico; no se verifico funcionalidad ni alcance transversal. |
+| [PAE San Andres 2021](../evidencia-fuentes/PAE-SAN-ANDRES-2021.pdf) y [reporte sectorial 2022](../evidencia-fuentes/PAE-SAI-REPORTE-2022.pdf) | Datos publicos reales con esquemas diferentes permiten probar extraccion y alineacion. | No prueban que IA hubiera evitado los problemas ni contienen el PAE 2026 final. |
+| [Vision Pais 2026](../evidencia-fuentes/Vision-Pais-2026.pdf) | Metas futuras de interoperabilidad, conocimiento e interdependencias. | Compromiso/vision, no evidencia de entrega actual. |
 | [Ley 1523, art. 61 - SUIN](https://www.suin-juriscol.gov.co/viewDocument.asp?id=1682614) | Ubica el PAE obligatorio en recuperacion y su coordinacion. | Obligacion no prueba dolor ni define todos los campos del producto. |
 | [Procuraduria - Providencia, 12 dic 2025](https://www.procuraduria.gov.co/Pages/procuraduria-advierte-inexistencia-plan-accion-espec%C3%ADfico-definitivo-reconstruccion-recuperacion-providencia.aspx) | No habia PAE final consolidado; faltaban inversion y horizonte en varias entidades. | Un caso; no identifica causalidad. |
 | [Procuraduria - Mocoa, 24 feb 2025](https://www.procuraduria.gov.co/Pages/procuraduria-investigacion-disciplinaria-retrasos-obras-recuperacion-mitigacion-riesgo-mocoa.aspx) y [alertas de proyectos](https://www.procuraduria.gov.co/Pages/obras-reconstruccion-mocoa-procuraduria-mantiene-7-alertas.aspx) | Retrasos, supervision tardia y dependencias entre proyectos. | Seguimiento/investigacion; no sentencia ni prueba que un linter sea solucion. |
@@ -49,13 +49,13 @@ comparacion de funciones publicitadas. La conclusion vigente esta en
 | Fuente | Uso en la decision | Lo que no prueba |
 |---|---|---|
 | [Ley 1523 de 2012 - Gestor Normativo](https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=47141) y [SUIN-Juriscol](https://www.suin-juriscol.gov.co/viewDocument.asp?id=1682614) | Procesos de gestion del riesgo; responsabilidades territoriales; PMGRD/EMRE; estrategia de respuesta; interoperabilidad; plan de accion de recuperacion. | Flujo detallado de cada entidad ni adopcion de Nexo. La ley tiene modificaciones posteriores, incluida Ley 2474 de 2025. |
-| [Circular UNGRD 031 de 2026](../evidence/sources/Circular-031-2026.pdf) | PMGRD/EMRE dinamicos; implementacion, seguimiento, evaluacion, ajuste e identificacion de brechas. | Que Nexo sea obligatorio o suficiente. |
+| [Circular UNGRD 031 de 2026](../evidencia-fuentes/Circular-031-2026.pdf) | PMGRD/EMRE dinamicos; implementacion, seguimiento, evaluacion, ajuste e identificacion de brechas. | Que Nexo sea obligatorio o suficiente. |
 
 ## Modelo operativo y evidencia de practica
 
 | Fuente | Uso en la decision | Limite |
 |---|---|---|
-| [Documento tecnico ENRE 2025 - borrador](../evidence/sources/ENRE-2025-draft.pdf) | Coordinacion; funcion de planeacion; EDAN/RUD; transicion a EDANPRI/PAE; informacion critica, validacion, interoperabilidad y plataformas existentes. | Es `Documento en Construccion`; no se trata como norma vigente. |
+| [Documento tecnico ENRE 2025 - borrador](../evidencia-fuentes/ENRE-2025-draft.pdf) | Coordinacion; funcion de planeacion; EDAN/RUD; transicion a EDANPRI/PAE; informacion critica, validacion, interoperabilidad y plataformas existentes. | Es `Documento en Construccion`; no se trata como norma vigente. |
 | [Pagina UNGRD de ENRE](https://portal.gestiondelriesgo.gov.co/Paginas/Slide_home/Estrategia-Nacional-para-la-Respuesta-a-Emergencias-ENRE.aspx) y [proyecto de decreto - Presidencia](https://dapre.presidencia.gov.co/AtencionCiudadana/Paginas/170925-proyecto-decreto-estrategia-nacional-respuesta-enmergencia.aspx) | Confirman el caracter de consulta/proyecto del documento revisado. | No prueban adopcion posterior; el estado debe volver a verificarse antes de uso real. |
 | [UNGRD - verificacion comunitaria de RUD y EDAN](https://portal.gestiondelriesgo.gov.co/Paginas/Noticias/2021/UNGRD-realiza-junto-a-la-comunidad-verificacion-de-informacion-del-Registro-Unico-de-Damnificados-y-de-la-Evaluacion.aspx) | Caso oficial donde se valido veracidad y se incluyeron personas/infraestructura ausentes de ambas bases. | No cuantifica frecuencia, costo ni causa de las diferencias. |
 | [MEGIR - marco estrategico](https://portal.gestiondelriesgo.gov.co/marcoestrategico/) | Prueba que ya existe medicion/reporte territorial de capacidades. | No prueba que todas las capacidades esten actualizadas ni que simulacion sea innecesaria. |
@@ -64,7 +64,7 @@ comparacion de funciones publicitadas. La conclusion vigente esta en
 
 | Fuente | Uso |
 |---|---|
-| [`deck-CTW-2026.pdf`](../deck-CTW-2026.pdf) | Tracks, formato, fecha y rubrica oficial: impacto 25, IA 25, demo 20, viabilidad 15, tecnica/UX 15. |
+| [`deck-CTW-2026.pdf`](../../deck-CTW-2026.pdf) | Tracks, formato, fecha y rubrica oficial: impacto 25, IA 25, demo 20, viabilidad 15, tecnica/UX 15. |
 
 ## Competidores y comparables
 
