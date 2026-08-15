@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+/*
+  Contados — sistema visual
+  Documento institucional impreso: papel frío, tinta profunda, reglas finas.
+  Nada juguetón. Esto lo lee alguien angustiado, en un celular, de pie.
+*/
+
+:root {
+  --paper: #edecE6;
+  --paper-raised: #f6f5f1;
+  --ink: #171b24;
+  --ink-soft: #4a5261;
+  --ink-faint: #8c93a1;
+  --rule: #cfcdc4;
+  --rule-strong: #9c9a90;
+
+  /* Ámbar: "usted está aquí". Un solo acento, usado con avaricia. */
+  --signal: #a35a09;
+  --signal-wash: #f2e4cf;
+
+  /* Ladrillo: riesgo de quedar por fuera. Nunca decorativo. */
+  --alert: #8a1c2b;
+  --alert-wash: #f3dfe0;
+
+  --done: #2f5d4f;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-signal: var(--signal);
+  --color-signal-wash: var(--signal-wash);
+  --color-alert: var(--alert);
+  --color-alert-wash: var(--alert-wash);
+  --color-done: var(--done);
+  --font-display: var(--font-bitter);
+  --font-body: var(--font-karla);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-karla), Georgia, serif;
+  /* Grano de papel. Sutil: se siente, no se ve. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.038'/%3E%3C/svg%3E");
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+/* Etiquetas de formulario oficial: versalitas, muy espaciadas. */
+.folio {
+  font-family: var(--font-karla), sans-serif;
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--ink-faint);
+}
+
+.display {
+  font-family: var(--font-bitter), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+
+/* Regla doble, como en un membrete impreso. */
+.rule-double {
+  border-top: 3px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  height: 5px;
+}
+
+/* Entrada escalonada. Una sola coreografía, en la carga. */
+@keyframes lift {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.lift {
+  animation: lift 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* Pulso del marcador "usted está aquí". Lento, no ansioso. */
+@keyframes here {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(163, 90, 9, 0.42);
+  }
+  50% {
+    box-shadow: 0 0 0 11px rgba(163, 90, 9, 0);
+  }
+}
+
+.here {
+  animation: here 2.6s ease-out infinite;
+}
+
+@keyframes rec {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.rec {
+  animation: rec 1.1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift,
+  .here,
+  .rec {
+    animation: none;
+  }
+}
+
+*:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: 3px;
+}

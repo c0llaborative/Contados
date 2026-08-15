@@ -1,0 +1,35 @@
+# === PRIVACIDAD — no tocar sin leer docs/SEGURIDAD.md ===
+
+# Capturas del canal del evento: muestran nombre y fotografia de una persona
+# real. Clasificacion Interno. No entran al repositorio publico, al video ni a
+# ningun material de entrega. El deck basta para sustentar tracks y rubrica.
+archivo/canal-interno/
+
+# === Secretos ===
+.env
+.env.*
+!.env.example
+*.pem
+app/.gstack/
+
+# === Dependencias y build ===
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# === Sistema y editor ===
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# === Temporales ===
+tmp/
+*.log
+
+# Copia del .git que create-next-app dejo en app/. Se conserva en disco por
+# reversibilidad, pero no se versiona: solo contiene el commit del scaffold.
+archivo/app-git-scaffold/
