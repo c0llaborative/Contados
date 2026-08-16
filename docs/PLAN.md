@@ -1,7 +1,7 @@
 # Plan vivo — Contados
 
-- Estado: `PUBLICADO · GATES 0–5 CERRADOS · DESPLEGADO EN VERCEL · META CONECTADO CON LÍMITE DE DESTINATARIOS`
-- Fecha de estado: 2026-08-16 06:20 (America/Bogota)
+- Estado: `PUBLICADO · GATES 0–5 CERRADOS · DESPLEGADO EN VERCEL · CANAL REAL DE WHATSAPP RESPONDIENDO, CON LÍMITE DE DESTINATARIOS`
+- Fecha de estado: 2026-08-16 07:30 (America/Bogota)
 - Owner: equipo de hackathon
 - **Cierre de entregas: domingo 16 a las 09:00.**
 - Repositorio público: <https://github.com/c0llaborative/contados>
@@ -231,6 +231,21 @@ paso 9 (el video).
 | Se filtra PII | Todo sintético; capturas del canal excluidas en `.gitignore` | Cualquier dato real bloquea la publicación |
 
 ## Historial
+
+### 2026-08-16 — El canal real responde
+
+- Status: `HECHO`.
+- El equipo sincronizó `WHATSAPP_TOKEN` en producción y redesplegó. El canal
+  real de WhatsApp responde de extremo a extremo: **user-observed** por el
+  equipo el 2026-08-16 hacia las 07:30.
+- Cierra la acción operativa que EV-038 dejó abierta. EV-038 no se edita: probó
+  lo que probó cuando se corrió, y decía que hasta sincronizar el token todo
+  envío seguiría dando `131005`. Eso fue exactamente lo que pasó.
+- **El límite de EV-036 sigue en pie** y es lo único que queda del canal: sólo
+  responde a los teléfonos que estén en la lista de destinatarios autorizados
+  del número de prueba. Cada teléfono que vaya a probarlo hay que registrarlo
+  antes.
+- Owner: equipo de hackathon.
 
 ### 2026-08-16 — La conversación deja de olvidar, y WhatsApp recibe el legal design
 
