@@ -24,6 +24,8 @@ export interface SesionGuardada {
   actualizadoEn: number;
   destinatarioTemporal?: string;
   pendientes: string[];
+  ultimaCompuerta?: string;
+  alertasVistas?: string[];
 }
 
 export interface AlmacenSesiones {

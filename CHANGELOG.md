@@ -2,6 +2,52 @@
 
 Todas las fechas usan America/Bogota.
 
+## 2026-08-16 — La conversación deja de olvidar, y WhatsApp recibe el legal design
+
+### Fixed
+
+- **El seguimiento perdía la historia.** Reportado desde WhatsApp real: audio
+  enviado, diagnóstico correcto, y diez minutos después un mensaje nuevo recibía
+  una de las preguntas del principio. Otra vez la sospecha era Redis, y otra vez
+  no era: en `conversacion.ts`, al entrar en `SEGUIMIENTO` se borraban relato,
+  rondas y preguntas, así que el mensaje siguiente se clasificaba **solo**. Un
+  «¿y cuánto me demoro?» suelto no alcanza para ubicar a nadie, el modelo se
+  abstiene —que es lo que debe hacer— y devuelve una pregunta de apertura.
+  Reproducido con el almacén **en memoria**, lo que descarta Redis y descarta el
+  tiempo: el TTL es de 30 minutos y se renueva con cada mensaje.
+- Ahora el relato se conserva y lo nuevo se le suma, y `preguntas` se conserva
+  para no repetir lo ya preguntado. Si el paso resultante es el mismo que el
+  último comunicado, se responde corto —`Sigue en: …` más qué hacer— en vez de
+  soltar el bloque completo otra vez. Un riesgo ya avisado no se repite; uno
+  nuevo sí aparece.
+
+### Added
+
+- `lib/canales/whatsapp/formato.ts`: **el legal design del simulador ahora
+  también llega a WhatsApp.** El simulador reconoce cada mensaje por su prefijo
+  y dibuja tarjetas; el adaptador de Meta enviaba ese mismo string tal cual, así
+  que el jurado veía las tarjetas y la persona damnificada recibía párrafos
+  corridos. Estaba al revés. El adaptador aplica ahora la misma lógica con lo
+  que WhatsApp tiene: negrita, cursiva, saltos de línea y un riel
+  `🟢🟢⚪⚪⚪ paso 2 de 5`. El núcleo no cambia — un núcleo, y cada superficie
+  presenta a su manera.
+- Dos reglas que no se negocian: **no se reescribe ni se resume nada**, sólo se
+  separa lo que el núcleo ya distingue; y si un prefijo no coincide, el mensaje
+  sale tal cual. Los círculos del riel son emoji estándar a propósito: los
+  caracteres de bloque se rompen en teléfonos de gama baja, que son los de esta
+  gente.
+
+### Verified
+
+- `npm test` 26/26, `npx tsc --noEmit` exit 0, `npm run build` exit 0 con 11
+  rutas. Cuatro pruebas nuevas, todas fallarían con el código anterior. El
+  render se comprobó contra la ruta real de Manizales. Evidencia **EV-037**.
+
+### Not verified
+
+- El legal design de WhatsApp **no se ha validado con nadie ajeno al equipo**.
+  `EXT-UX-003` sigue pendiente.
+
 ## 2026-08-16 — Por qué un teléfono no recibía nada
 
 ### Fixed

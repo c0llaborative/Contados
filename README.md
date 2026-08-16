@@ -137,7 +137,11 @@ calcula el vencimiento en código.
 
 **Un núcleo, tres superficies.** El dominio vive en `app/lib/nucleo/`, sin
 dependencias de Next.js. WhatsApp, el simulador y la web invocan el mismo
-handler, así que no hay dos implementaciones que puedan divergir.
+handler, así que no hay dos implementaciones que puedan divergir. El núcleo
+entrega texto semántico y cada superficie lo presenta a su manera: el simulador
+lo maqueta con tarjetas y un riel de cinco pasos; WhatsApp, con negrita, saltos
+de línea y `🟢🟢⚪⚪⚪ paso 2 de 5`. Nadie reescribe ni resume: sólo se separa lo
+que el núcleo ya distingue.
 
 | Superficie | Usuario |
 |---|---|

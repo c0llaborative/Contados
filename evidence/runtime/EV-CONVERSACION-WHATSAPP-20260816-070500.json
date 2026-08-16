@@ -1,0 +1,43 @@
+{
+  "evidence_id": "EV-037",
+  "timestamp": "2026-08-16T07:05:00-05:00",
+  "observer": "Claude Opus 5 + equipo (prueba en WhatsApp real user-observed)",
+  "scope": "Dos defectos de conversacion reportados desde WhatsApp real: repregunta tras un diagnostico, y ausencia de legal design en los mensajes entregados",
+  "result": "pass",
+  "defect_1_followup": {
+    "reported": "Chat iniciado, saludo recibido, audio enviado y respondido bien. Diez minutos despues, un mensaje nuevo recibio una de las preguntas del principio.",
+    "suspected": "Perdida de memoria en Redis.",
+    "actual_cause": "Ninguna perdida. En conversacion.ts, al entrar en estado SEGUIMIENTO el codigo borraba relato, rondas y preguntas, de modo que el mensaje siguiente se clasificaba solo, sin la historia. Un seguimiento corto -'¿y cuanto me demoro?'- no alcanza para ubicar a nadie, el modelo se abstiene correctamente y devuelve una pregunta de apertura.",
+    "reproduction": "Prueba con el almacen EN MEMORIA y un clasificador falso: el sintoma aparece igual, lo que descarta Redis y descarta el tiempo. El clasificador recibio '¿Y cuanto me demoro?' a secas y el relato guardado quedo en esa misma frase.",
+    "time_is_a_red_herring": "El TTL es de 30 minutos y se renueva con cada mensaje. Con 10 segundos de espera habria pasado lo mismo.",
+    "fix": "El relato se conserva y lo nuevo se le suma; 'preguntas' tambien se conserva para no repetir lo ya preguntado. Si el paso resultante es el mismo que el ultimo comunicado, se responde corto -'Sigue en: X' mas que hacer- en vez de repetir el bloque completo. Un riesgo ya avisado no se repite; uno nuevo si aparece.",
+    "session_fields_added": ["ultimaCompuerta", "alertasVistas"],
+    "back_compat": "Las sesiones ya escritas en Redis no tienen los campos nuevos; se inicializan al leerlas y la conversacion continua."
+  },
+  "defect_2_legal_design": {
+    "reported": "Las tecnicas de legal design aplicadas al simulador no llegaban a los mensajes reales de WhatsApp.",
+    "confirmed": "Cierto. El simulador reconoce cada mensaje por su prefijo y dibuja tarjetas -etiqueta, titular, riel de cinco pasos, pin de direccion-; el adaptador de Meta enviaba el mismo string tal cual, asi que WhatsApp lo mostraba como parrafos corridos. El jurado veia las tarjetas y la persona damnificada no.",
+    "fix": "lib/canales/whatsapp/formato.ts aplica en el adaptador la misma logica de prefijos con lo que WhatsApp tiene: negrita, cursiva, saltos de linea y emoji como iconos. El nucleo no cambia.",
+    "rules": [
+      "No se reescribe ni se resume nada: solo se separa lo que el nucleo ya distingue.",
+      "Si un prefijo no coincide, el mensaje sale tal cual. Las preguntas de abstencion salen sin tocar.",
+      "El riel usa emoji de circulo de color y no caracteres de bloque, que se rompen en telefonos de gama baja."
+    ],
+    "rendered_sample": {
+      "paso": "*Su caso va aqui: Que lo censen* / 🟢🟢⚪⚪⚪ paso 2 de 5 / explicacion / _motivo del caso en cursiva_",
+      "accion": "*✅ Que hacer ahora* / accion / 📍 Comando de Bomberos de Fundadores — carpa de registro. / _nota en cursiva_",
+      "riesgo": "*⚠️ Riesgo de quedar por fuera* / titulo / razon / 👉 *Pida esto:* accion",
+      "note": "Renderizado contra la ruta real de Manizales, no contra un fixture inventado."
+    },
+    "legal_content_preserved": "Las tres afirmaciones obligatorias del saludo -no registra, no pide cedula ni datos bancarios ni huella, el censo es gratis- y las del borrador de peticion -15 minutos, no lo radica por usted- estan cubiertas por pruebas."
+  },
+  "verification": {
+    "tests": "26/26 pass",
+    "typescript": "pass",
+    "next_build": "pass",
+    "routes": 11,
+    "new_tests": 4
+  },
+  "privacy": "Cero telefonos y cero relatos reales. Las pruebas usan un clasificador falso y datos sinteticos.",
+  "interpretation": "Prueba que ninguno de los dos defectos era la persistencia en Redis, y que ambos estan corregidos con pruebas que fallarian con el codigo anterior. NO prueba el efecto en una persona real: el legal design de WhatsApp no se ha validado con nadie ajeno al equipo, y EXT-UX-003 sigue pendiente. Tampoco prueba el comportamiento del modelo ante seguimientos reales. Archivo sellado, no editar."
+}

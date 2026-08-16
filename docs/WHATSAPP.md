@@ -241,6 +241,36 @@ la respuesta lista en vez de quedar en blanco.
 | Deduplicación y debounce de 12 s en memoria | Funciona en una sola instancia; un reinicio pierde el lote | Requiere cola compartida. El **estado de la conversación** ya no está aquí: vive en Redis desde el 2026-08-16 |
 | Enlace de petición bearer de 15 min | No reenviar ni capturar; expirado se regenera | Requiere política de rotación y, si se necesita revocación individual, almacenamiento servidor |
 
+## El legal design también va en WhatsApp
+
+El núcleo entrega texto semántico y **cada superficie lo presenta a su manera**.
+El simulador reconoce cada mensaje por su prefijo y dibuja tarjetas: etiqueta,
+titular, riel de cinco pasos, pin de dirección. Hasta el 2026-08-16 el adaptador
+de Meta mandaba ese mismo string **tal cual**, así que la persona que de verdad
+usa el producto recibía párrafos corridos y el jurado veía las tarjetas. Estaba
+al revés.
+
+`lib/canales/whatsapp/formato.ts` hace lo mismo que el simulador con lo que
+WhatsApp sí tiene —negrita, cursiva, saltos de línea y unos pocos emoji que
+funcionan como iconos:
+
+| Mensaje del núcleo | Lo que llega al teléfono |
+|---|---|
+| `Su caso parece estar en: …` | Titular en negrita, `🟢🟢⚪⚪⚪ paso 2 de 5`, y la explicación separada del motivo de su caso |
+| `Qué hacer ahora: …` | `*✅ Qué hacer ahora*`, la acción, y la dirección con `📍` en su propia línea |
+| `Riesgo de quedar por fuera: …` | `*⚠️ Riesgo de quedar por fuera*` y `👉 *Pida esto:*` con la acción |
+| Saludo | Los tres avisos obligatorios en líneas propias, no enterrados en un párrafo |
+| Borrador de petición | Titular, enlace en línea aparte, y el plazo y el «no lo radica por usted» en cursiva |
+
+Dos reglas que no se negocian: **no se reescribe ni se resume nada** —sólo se
+separa lo que el núcleo ya distingue— y si un prefijo no coincide, el mensaje
+sale tal cual. Las preguntas de abstención salen sin tocar: ya son una línea
+corta y no ganan nada con jerarquía.
+
+Los círculos del riel son emoji estándar a propósito. Los caracteres de bloque
+(`▰▱`) se ven bien en un escritorio y se rompen en teléfonos de gama baja, que
+son justamente los de esta gente.
+
 ## Si un teléfono no recibe nada
 
 Pasó el 2026-08-16 en producción: desde un teléfono la conversación funcionaba y

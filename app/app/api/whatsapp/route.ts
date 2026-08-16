@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import { after } from 'next/server';
 import { crearAgrupador, debounceWhatsAppMs } from '@/lib/canales/whatsapp/agrupar';
 import { extraerMensajes } from '@/lib/canales/whatsapp/entrante';
+import { formatearParaWhatsApp } from '@/lib/canales/whatsapp/formato';
 import type { MensajeMeta } from '@/lib/canales/whatsapp/entrante';
 import { idSeguroDeTelefono } from '@/lib/canales/whatsapp/identidad';
 import {
@@ -45,7 +46,12 @@ const agrupador = crearAgrupador<MensajeMeta>(async (entradas) => {
       : null;
     if (enlace) salida.mensajes.push(enlace);
     if (process.env.WHATSAPP_SEND_ENABLED === 'true') {
-      for (const respuesta of salida.mensajes) await enviarTexto(destino, respuesta);
+      // El núcleo entrega texto semántico; cada superficie lo presenta a su
+      // manera. El simulador lo maqueta con tarjetas; aquí se maqueta con lo
+      // que WhatsApp tiene.
+      for (const respuesta of salida.mensajes) {
+        await enviarTexto(destino, formatearParaWhatsApp(respuesta));
+      }
     }
   } catch (error) {
     // Si lo que falló fue la entrega, disculparse por el mismo canal vuelve a

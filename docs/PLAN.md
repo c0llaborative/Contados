@@ -232,6 +232,36 @@ paso 9 (el video).
 
 ## Historial
 
+### 2026-08-16 — La conversación deja de olvidar, y WhatsApp recibe el legal design
+
+- Status: `HECHO`.
+- Scope: dos defectos reportados desde WhatsApp real por el equipo.
+- **Uno.** Audio enviado, diagnóstico correcto, y diez minutos después un
+  mensaje nuevo recibía una de las preguntas del principio. La sospecha volvió a
+  ser Redis. Volvió a no serlo: al entrar en `SEGUIMIENTO` el código borraba el
+  relato, así que el mensaje siguiente se clasificaba solo. Un seguimiento corto
+  no alcanza para ubicar a nadie, el modelo se abstiene —correctamente— y
+  devuelve una pregunta de apertura. Reproducido con el almacén **en memoria**,
+  lo que descarta Redis y descarta el tiempo: el TTL es de 30 minutos y se
+  renueva con cada mensaje; con 10 segundos habría pasado igual. Ahora el relato
+  se conserva, y si el paso no cambió se responde corto en vez de repetir el
+  bloque entero.
+- **Dos.** El legal design del simulador no llegaba a WhatsApp. El simulador
+  reconoce cada mensaje por su prefijo y dibuja tarjetas; el adaptador de Meta
+  mandaba el string tal cual. El jurado veía las tarjetas y la persona
+  damnificada recibía párrafos corridos: estaba al revés. `formato.ts` aplica lo
+  mismo con lo que WhatsApp tiene, sin tocar el núcleo y sin reescribir ni
+  resumir nada.
+- Decision: la maquetación vive en el **adaptador**, no en el núcleo. Meter
+  asteriscos en el núcleo habría roto el simulador, que parsea esos mismos
+  prefijos, y habría atado el dominio a la sintaxis de un canal.
+- Verified: `npm test` 26/26, `npx tsc --noEmit` exit 0, `npm run build` exit 0
+  con 11 rutas. Cuatro pruebas nuevas; el render se comprobó contra la ruta real
+  de Manizales. Evidencia **EV-037**.
+- Remaining: el legal design de WhatsApp no lo ha visto nadie ajeno al equipo.
+  `EXT-UX-003` sigue pendiente y es la prueba que falta.
+- Owner: equipo de hackathon.
+
 ### 2026-08-16 — Un teléfono no recibía nada: no era Redis, era la lista de Meta
 
 - Status: `RESUELTO EN CÓDIGO Y DOCUMENTADO · ACCIÓN OPERATIVA ABIERTA`.

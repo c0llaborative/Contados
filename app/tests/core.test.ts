@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { crearAgrupador, debounceWhatsAppMs } from '../lib/canales/whatsapp/agrupar';
 import { extraerMensajes } from '../lib/canales/whatsapp/entrante';
+import { formatearParaWhatsApp } from '../lib/canales/whatsapp/formato';
 import { idSeguroDeTelefono } from '../lib/canales/whatsapp/identidad';
 import {
   enviarTexto,
@@ -10,7 +11,7 @@ import {
 } from '../lib/canales/whatsapp/saliente';
 import { MAX_AUDIO_BYTES, transcribirAudio } from '../lib/canales/whatsapp/transcribir';
 import { almacenEnMemoria } from '../lib/nucleo/almacen-sesiones';
-import { crearConversador, ErrorLimiteConversacion } from '../lib/nucleo/conversacion';
+import { crearConversador, ErrorLimiteConversacion, SALUDO } from '../lib/nucleo/conversacion';
 import { asegurarInvariantes } from '../lib/nucleo/clasificar';
 import { crearMensajeEnlacePeticion } from '../lib/nucleo/enlace-peticion';
 import { DIAGNOSTICO_SCHEMA, type Diagnostico } from '../lib/nucleo/schema';
@@ -431,4 +432,132 @@ test('un rechazo de Meta conserva su código, y 131030 es el de la lista de auto
     process.env.WHATSAPP_PHONE_NUMBER_ID = anterior.phoneId ?? '';
     process.env.WHATSAPP_GRAPH_VERSION = anterior.version ?? '';
   }
+});
+
+test('un mensaje de seguimiento conserva la historia y no repregunta lo de apertura', async () => {
+  // Reproduce el fallo observado en WhatsApp real el 2026-08-16: la persona
+  // mandaba un audio, recibía su diagnóstico, esperaba diez minutos y al
+  // escribir de nuevo recibía una de las preguntas del principio. Parecía
+  // memoria perdida; era el relato borrado al entrar en SEGUIMIENTO. Se usa el
+  // almacén en memoria a propósito: si el fallo dependiera de Redis, esta
+  // prueba no podría reproducirlo.
+  const almacen = almacenEnMemoria();
+  const relatosVistos: string[] = [];
+  const clasificador = async (relato: string): Promise<Diagnostico> => {
+    relatosVistos.push(relato);
+    return relato.includes('cuaderno')
+      ? {
+          compuerta: 'censo',
+          razon: 'Anotaron sus datos.',
+          hechos: [{ afirmacion: 'Anotaron sus datos.', evidencia: 'anotó en un cuaderno' }],
+          alertas: [],
+          falta_preguntar: [],
+          posible_estafa: false,
+        }
+      : base;
+  };
+  const reloj = { t: Date.UTC(2026, 7, 16, 11, 0) };
+  const { conversar } = crearConversador(clasificador, () => reloj.t, almacen);
+
+  await conversar({ sesionId: 'ana', texto: 'hola' });
+  const dx = await conversar({
+    sesionId: 'ana',
+    texto: 'Vino una señora con chaleco y anotó en un cuaderno.',
+  });
+  assert.equal(dx.estado, 'SEGUIMIENTO');
+  assert.match(dx.mensajes.join(' '), /Su caso parece estar en: /);
+
+  reloj.t += 10 * 60 * 1000; // Muy dentro del TTL de 30 minutos.
+  const seguimiento = await conversar({ sesionId: 'ana', texto: '¿Y cuánto me demoro?' });
+
+  // El clasificador tiene que ver la historia completa, no el mensaje suelto.
+  assert.match(relatosVistos.at(-1)!, /cuaderno/);
+  assert.match(relatosVistos.at(-1)!, /cuánto me demoro/);
+  // Y la persona no puede recibir una pregunta de apertura.
+  assert.equal(seguimiento.estado, 'SEGUIMIENTO');
+  assert.ok(!seguimiento.mensajes.some((m) => base.falta_preguntar.includes(m)));
+  // Mismo paso: se confirma corto en vez de repetir el bloque entero.
+  assert.match(seguimiento.mensajes[0], /^Sigue en: /);
+  assert.ok(!seguimiento.mensajes.some((m) => m.startsWith('Su caso parece estar en: ')));
+  assert.match(seguimiento.mensajes.join(' '), /Qué hacer ahora: /);
+});
+
+test('un riesgo ya avisado no se repite, y uno nuevo sí aparece', async () => {
+  const almacen = almacenEnMemoria();
+  const arrendataria = {
+    riesgo: 'arrendatario' as const,
+    razon: 'Contó que vive en arriendo.',
+    accion: 'Pida que la registren como arrendataria.',
+  };
+  const sinDocumentos = {
+    riesgo: 'sin_documentos' as const,
+    razon: 'Contó que perdió los papeles.',
+    accion: 'Pida constancia de la pérdida.',
+  };
+  let alertas: Diagnostico['alertas'] = [arrendataria];
+  const clasificador = async (): Promise<Diagnostico> => ({
+    compuerta: 'censo',
+    razon: 'Anotaron sus datos.',
+    hechos: [],
+    alertas,
+    falta_preguntar: [],
+    posible_estafa: false,
+  });
+  const { conversar } = crearConversador(clasificador, () => Date.UTC(2026, 7, 16, 11), almacen);
+
+  const primero = await conversar({ sesionId: 'ana', texto: 'Vivo en arriendo y se cayó la casa.' });
+  assert.equal(primero.mensajes.filter((m) => m.startsWith('Riesgo de quedar por fuera')).length, 1);
+
+  const segundo = await conversar({ sesionId: 'ana', texto: '¿Y ahora qué sigue?' });
+  assert.equal(segundo.mensajes.filter((m) => m.startsWith('Riesgo de quedar por fuera')).length, 0);
+
+  alertas = [arrendataria, sinDocumentos];
+  const tercero = await conversar({ sesionId: 'ana', texto: 'También perdí los papeles.' });
+  const nuevas = tercero.mensajes.filter((m) => m.startsWith('Riesgo de quedar por fuera'));
+  assert.equal(nuevas.length, 1);
+  assert.match(nuevas[0], /documento/i);
+});
+
+test('WhatsApp recibe el mismo legal design del simulador, no párrafos corridos', () => {
+  const paso = formatearParaWhatsApp(
+    'Su caso parece estar en: Que lo censen. El censo es el registro de los datos del hogar afectado. Anotaron sus datos.',
+  );
+  // Titular en negrita, riel de cinco y posición explícita.
+  assert.match(paso, /^\*Su caso va aquí: Que lo censen\*/);
+  assert.match(paso, /🟢🟢⚪⚪⚪ paso 2 de 5/);
+  // No se reescribe ni se resume: la explicación del núcleo sigue completa.
+  assert.match(paso, /El censo es el registro de los datos del hogar afectado\./);
+
+  const accion = formatearParaWhatsApp(
+    'Qué hacer ahora: Acérquese al punto de atención. Dónde: Calle 19 # 21-44. Lleve un recibo.',
+  );
+  assert.match(accion, /^\*✅ Qué hacer ahora\*/);
+  assert.match(accion, /📍 Calle 19 # 21-44\./);
+  assert.match(accion, /_Lleve un recibo\._/);
+
+  const riesgo = formatearParaWhatsApp(
+    'Riesgo de quedar por fuera: Es arrendatario. Contó que vive en arriendo. Pida esto: Pida que la registren como arrendataria.',
+  );
+  assert.match(riesgo, /^\*⚠️ Riesgo de quedar por fuera\*/);
+  assert.match(riesgo, /👉 \*Pida esto:\* Pida que la registren como arrendataria\./);
+
+  // Un mensaje que no tiene prefijo conocido sale intacto: una pregunta de
+  // abstención ya es corta y no gana nada con jerarquía.
+  const pregunta = '¿Un funcionario tomó sus datos o un técnico revisó su vivienda?';
+  assert.equal(formatearParaWhatsApp(pregunta), pregunta);
+});
+
+test('el formato de WhatsApp no altera el contenido legal del saludo ni de la petición', () => {
+  const saludo = formatearParaWhatsApp(SALUDO);
+  // Las tres afirmaciones obligatorias sobreviven a la maquetación.
+  assert.match(saludo, /no\* lo registra ante ninguna entidad/);
+  assert.match(saludo, /cédula, datos bancarios ni huella/);
+  assert.match(saludo, /gratis/);
+
+  const peticion = formatearParaWhatsApp(
+    'Borrador de derecho de petición (enlace privado, válido 15 minutos): https://contados.vercel.app/api/peticion/abc Contados no lo radica por usted.',
+  );
+  assert.match(peticion, /https:\/\/contados\.vercel\.app\/api\/peticion\/abc/);
+  assert.match(peticion, /15 minutos/);
+  assert.match(peticion, /no lo radica por usted/);
 });
