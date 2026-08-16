@@ -1,14 +1,16 @@
 # Plan vivo — Contados
 
-- Estado: `PUBLICADO · GATES 0–5 CERRADOS · REPO PUBLICADO · DESPLIEGUE Y META PENDIENTES`
-- Fecha de estado: 2026-08-16 04:30 (America/Bogota)
+- Estado: `PUBLICADO · GATES 0–5 CERRADOS · DESPLEGADO EN VERCEL · META CONECTADO CON LÍMITE DE DESTINATARIOS`
+- Fecha de estado: 2026-08-16 06:20 (America/Bogota)
 - Owner: equipo de hackathon
 - **Cierre de entregas: domingo 16 a las 09:00.**
 - Repositorio público: <https://github.com/c0llaborative/contados>
-- **Siguiente acción exacta:** terminar el video y subirlo; en paralelo,
-  desplegar en Vercel para obtener la URL HTTPS que desbloquea el webhook de Meta
-  en Gate 7. El despliegue y Meta son opcionales para la entrega: el video se
-  graba con el simulador y ya está verificado.
+- **Siguiente acción exacta:** terminar el video y subirlo. El despliegue está
+  hecho y el webhook de Meta está conectado; lo que queda del canal real es
+  operativo: agregar a la lista de destinatarios autorizados **cada teléfono**
+  que vaya a probarlo (ver la entrada del 2026-08-16 sobre `131030`). Nada de
+  esto bloquea la entrega: el video se graba con el simulador y ya está
+  verificado.
 - Track: **02 — Justicia** (defendible también en 01; ver
   [ADR 0005](adr/0005-contados.md))
 - Entregables: **repositorio** + **video de 60 segundos**.
@@ -229,6 +231,52 @@ paso 9 (el video).
 | Se filtra PII | Todo sintético; capturas del canal excluidas en `.gitignore` | Cualquier dato real bloquea la publicación |
 
 ## Historial
+
+### 2026-08-16 — Un teléfono no recibía nada: no era Redis, era la lista de Meta
+
+- Status: `RESUELTO EN CÓDIGO Y DOCUMENTADO · ACCIÓN OPERATIVA ABIERTA`.
+- Scope: se probó el despliegue de producción desde dos teléfonos para verificar
+  la persistencia de sesiones en Redis desplegada esa mañana. Uno conversaba
+  normalmente; el otro **no recibía absolutamente nada**. Sospecha inicial:
+  Redis.
+- Machine-verified: **no era Redis, y Redis funciona.** Las dos sesiones estaban
+  vivas en el almacén con TTL vigente (1761 s y 1376 s de 1800 s). La del
+  teléfono que sí respondía estaba en `PREGUNTANDO` con `rondas=2`, y ese
+  contador sólo llega a 2 si la sesión sobrevivió entre mensajes que pudieron
+  caer en instancias distintas — justo lo que fallaba antes del arreglo. La del
+  teléfono silencioso **también existía**: el webhook recibió su mensaje y lo
+  procesó; lo único que falló fue la entrega.
+- Diagnosis: el remitente es un **número de prueba** de Meta Cloud API
+  (`verified_name: "Test Number"`, `code_verification_status: NOT_VERIFIED`,
+  confirmado con `GET /{phone_number_id}`). Un número de prueba sólo puede
+  responderle a los teléfonos que estén en su lista de destinatarios
+  autorizados. A cualquier otro, Meta acepta el mensaje entrante y rechaza la
+  respuesta con `131030`. Log de producción de las 06:06:53 con HTTP 400, y
+  reproducido con una sonda dirigida a `+1 555-011-1111`, un número no asignable
+  a ninguna persona, elegido precisamente para no escribirle a nadie.
+- Por qué costó verlo: el adaptador de salida lanzaba
+  `Meta rechazó el envío (400)` y **descartaba el cuerpo**, que es donde viene el
+  código. Un `131030`, un `131047` y un cuerpo mal formado se veían idénticos en
+  el log. Hizo falta una sonda manual contra Meta para distinguirlos.
+- Fix en código: `ErrorEnvioMeta` conserva estado HTTP y código de Meta, sin
+  meter el teléfono en el mensaje que va al log; y el webhook dejó de intentar
+  un mensaje de disculpa por el canal que acaba de fallar, porque volvía a
+  fallar igual y duplicaba el error. Ante `131030` escribe una línea que dice
+  dónde se arregla.
+- Lo que **no** se puede arreglar desde el producto: no hay forma de avisarle a
+  esa persona que no se le puede responder, porque el único canal para avisarle
+  es el bloqueado. Por eso el arreglo real es operativo.
+- Riesgo materializado: el registro del Gate 5 aceptó como riesgo que la consola
+  no mostrara el límite de destinatarios. Era este. Ahora está confirmado,
+  medido y escrito donde el jurado lo va a leer.
+- Verified: `npm test` 22/22, `npx tsc --noEmit` exit 0, `npm run build` exit 0
+  con 11 rutas. Evidencia sellada en **EV-036**; `EXT-META-001` pasa a **PASS con
+  límite** — el canal está conectado y se puede afirmar.
+- Next action (equipo): agregar en Meta › WhatsApp › API Setup **cada teléfono**
+  que vaya a probar el canal real, jurado incluido, antes de la demostración. Si
+  no se puede, la demostración va por `/whatsapp`, que no tiene esa restricción.
+- Owners: equipo para la consola de Meta; Claude para código, documentación y
+  evidencia.
 
 ### 2026-08-16 — Regresión de Groq: la cuenta pierde acceso de inferencia
 

@@ -4,7 +4,11 @@ import { crearAgrupador, debounceWhatsAppMs } from '@/lib/canales/whatsapp/agrup
 import { extraerMensajes } from '@/lib/canales/whatsapp/entrante';
 import type { MensajeMeta } from '@/lib/canales/whatsapp/entrante';
 import { idSeguroDeTelefono } from '@/lib/canales/whatsapp/identidad';
-import { enviarTexto } from '@/lib/canales/whatsapp/saliente';
+import {
+  enviarTexto,
+  ErrorEnvioMeta,
+  META_DESTINO_NO_AUTORIZADO,
+} from '@/lib/canales/whatsapp/saliente';
 import { transcribirAudioMeta } from '@/lib/canales/whatsapp/transcribir';
 import { conversador, MAX_RELATO_CARACTERES } from '@/lib/nucleo/conversacion';
 import { crearMensajeEnlacePeticion } from '@/lib/nucleo/enlace-peticion';
@@ -44,6 +48,19 @@ const agrupador = crearAgrupador<MensajeMeta>(async (entradas) => {
       for (const respuesta of salida.mensajes) await enviarTexto(destino, respuesta);
     }
   } catch (error) {
+    // Si lo que falló fue la entrega, disculparse por el mismo canal vuelve a
+    // fallar exactamente igual y sólo ensucia el log. El caso observado en
+    // producción es 131030: el número de pruebas de Meta no puede responderle a
+    // un teléfono que no esté en su lista de destinatarios autorizados, así que
+    // la persona no recibe nada y aquí queda dicho por qué.
+    if (error instanceof ErrorEnvioMeta) {
+      if (error.codigo === META_DESTINO_NO_AUTORIZADO) {
+        console.error(
+          '[whatsapp] Meta no entregó la respuesta: el teléfono no está en la lista de destinatarios autorizados del número de pruebas. Agréguelo en la consola de Meta (WhatsApp › API Setup) o use un número de producción.',
+        );
+      }
+      throw error;
+    }
     if (process.env.WHATSAPP_SEND_ENABLED === 'true') {
       try {
         await enviarTexto(

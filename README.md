@@ -146,11 +146,16 @@ handler, así que no hay dos implementaciones que puedan divergir.
 | Web `/` | Damnificado; captura y pasos |
 | Web `/tablero` | Coordinador municipal / UNGRD |
 
-Detalles que importan: agrupación de mensajes de 12 s para que una historia
+Detalles que importan: el estado de cada conversación vive **fuera del proceso**,
+en Redis con 30 minutos de vida, porque en serverless dos mensajes seguidos
+pueden caer en instancias distintas y la persona no tiene por qué contar su
+historia dos veces; agrupación de mensajes de 12 s para que una historia
 partida en varios audios reciba **un** diagnóstico; enlace del derecho de
 petición cifrado con AES-256-GCM y válido 15 minutos; el número de teléfono nunca
-se guarda crudo, sólo su hash con sal; el audio se procesa en memoria y no toca
-disco; y los envíos reales exigen una compuerta de configuración explícita.
+se usa como identificador ni se escribe en un log —la llave es su hash con sal—
+y el número crudo sólo vive dentro de la sesión, que se borra a los 30 minutos;
+el audio se procesa en memoria y no toca disco; y los envíos reales exigen una
+compuerta de configuración explícita.
 
 Verificación: `npm test` · `npx tsc --noEmit` · `npm run build`.
 
@@ -169,6 +174,15 @@ Lo decimos aquí y lo dice el producto en su primer mensaje, siempre:
 
 Preferimos decirlos a que los descubra el jurado:
 
+- **El WhatsApp real sólo le contesta a teléfonos registrados de antemano.** El
+  canal corre sobre un número de prueba de Meta, y un número de prueba únicamente
+  puede responderle a los teléfonos que estén en su lista de destinatarios
+  autorizados. A cualquier otro, Meta recibe el mensaje y rechaza la respuesta
+  (`131030`): la persona no ve un error, ve silencio. Lo comprobamos el 16 de
+  agosto de 2026 probando desde dos teléfonos, uno registrado y otro no
+  ([EV-036](EVIDENCE_REGISTER.md)). Si quiere probar el canal real, díganos el
+  número antes; si no, **`/whatsapp` no tiene esa restricción** y es la misma
+  conversación.
 - El clasificador está aprobado contra **cinco relatos sintéticos**, no contra
   relatos reales. La demostración usa esos casos.
 - Las cifras del tablero son **54 casos sintéticos**. Ninguna persona real.

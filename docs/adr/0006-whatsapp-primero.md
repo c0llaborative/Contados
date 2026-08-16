@@ -148,6 +148,12 @@ web.** Ver [`SEGURIDAD.md`](../SEGURIDAD.md) regla 12.
 - **El estado de conversación vive en memoria**, con TTL. Se pierde al reiniciar
   el proceso. Una base de datos es riesgo sin premio a esta altura. Se documenta
   como limitación; además es una postura de retención defendible.
+  **Revisado el 2026-08-16:** la limitación se volvió un fallo en cuanto el
+  producto corrió en más de una instancia —la sesión desaparecía entre un mensaje
+  y el siguiente— y el estado pasó a Redis con el mismo TTL de 30 minutos. La
+  postura de retención se sostiene; la afirmación «se pierde al reiniciar el
+  proceso» ya no es cierta y queda aquí sólo como registro de lo que se decidió
+  ese día.
 - **Fuera de la ventana de 24 h de WhatsApp no se puede escribir libre**: hace
   falta una plantilla aprobada por Meta. En el demo la ventana está abierta, pero
   es una restricción real para escalar la notificación proactiva. Se documenta en

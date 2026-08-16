@@ -158,8 +158,12 @@ tratar el número con menos cuidado.
 - La llave de sesión es `SHA-256(número + SESION_SAL)`. Nunca se usa el
   número crudo como identificador.
 - El número crudo no se escribe en logs, ni en fixtures, ni en el repositorio.
-- Para poder responder y notificar, el destinatario crudo vive sólo en memoria
-  dentro de la sesión efímera; muere con el TTL o el proceso.
+- Para poder responder y notificar, el destinatario crudo vive dentro de la
+  sesión efímera y muere con su TTL de 30 minutos. **Desde el 2026-08-16 esa
+  sesión no vive en memoria sino en Redis**, porque en serverless se perdía
+  entre un mensaje y el siguiente. El cambio es real y se dice: el número crudo
+  sale del proceso y llega a un almacén administrado durante media hora. Sigue
+  sin ser la llave, sin escribirse en logs y sin sobrevivir al TTL.
 - La sal va en variable de entorno, no en el código.
 - El enlace al derecho de petición lleva un token autocontenido cifrado y
   autenticado con AES-256-GCM, no un consecutivo ni datos legibles.
@@ -171,13 +175,17 @@ bloquea la publicación.
 
 Estado: `CURRENT LOCAL`
 
-El estado vive en memoria con TTL y muere con el proceso. Es una limitación
-técnica real —está documentada en [`WHATSAPP.md`](WHATSAPP.md)— pero también es
-la postura de retención: **no acumulamos historias de damnificados.**
+El estado vive con un TTL de 30 minutos y se borra solo. La postura de retención
+no cambia —**no acumulamos historias de damnificados**— pero desde el 2026-08-16
+lo que la garantiza es el TTL y no el reinicio de un proceso: la sesión pasó de
+un `Map` en memoria a Redis, porque en serverless se perdía entre un mensaje y
+el siguiente y la persona tenía que contar su historia otra vez.
 
-Se dice como es: no hay base de datos, no hay respaldo, no hay histórico. Lo que
-persiste es el agregado anonimizado del tablero, que ya está rotulado como
-autorreportado por la regla 9.
+Se dice como es: durante esa media hora el relato y el número crudo **sí están
+guardados fuera del proceso**, en un almacén administrado. No hay base de datos
+relacional, no hay respaldo y no hay histórico; pasados los 30 minutos no queda
+nada que consultar. Lo único que sobrevive es el agregado anonimizado del
+tablero, que ya está rotulado como autorreportado por la regla 9.
 
 ## 15. El enlace temporal es una credencial de acceso
 

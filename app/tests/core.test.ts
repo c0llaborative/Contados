@@ -3,6 +3,11 @@ import test from 'node:test';
 import { crearAgrupador, debounceWhatsAppMs } from '../lib/canales/whatsapp/agrupar';
 import { extraerMensajes } from '../lib/canales/whatsapp/entrante';
 import { idSeguroDeTelefono } from '../lib/canales/whatsapp/identidad';
+import {
+  enviarTexto,
+  ErrorEnvioMeta,
+  META_DESTINO_NO_AUTORIZADO,
+} from '../lib/canales/whatsapp/saliente';
 import { MAX_AUDIO_BYTES, transcribirAudio } from '../lib/canales/whatsapp/transcribir';
 import { almacenEnMemoria } from '../lib/nucleo/almacen-sesiones';
 import { crearConversador, ErrorLimiteConversacion } from '../lib/nucleo/conversacion';
@@ -377,4 +382,53 @@ test('escapa contenido de la persona dentro del borrador', () => {
   assert.doesNotMatch(html, /<script>mal|<img src=x/);
   assert.match(html, /&lt;script&gt;mal&lt;\/script&gt;/);
   assert.match(html, /Centro &amp; Norte/);
+});
+
+test('un rechazo de Meta conserva su código, y 131030 es el de la lista de autorizados', async () => {
+  const anterior = {
+    fetch: globalThis.fetch,
+    enviar: process.env.WHATSAPP_SEND_ENABLED,
+    token: process.env.WHATSAPP_TOKEN,
+    phoneId: process.env.WHATSAPP_PHONE_NUMBER_ID,
+    version: process.env.WHATSAPP_GRAPH_VERSION,
+  };
+  process.env.WHATSAPP_SEND_ENABLED = 'true';
+  process.env.WHATSAPP_TOKEN = 'token-sintetico';
+  process.env.WHATSAPP_PHONE_NUMBER_ID = '000';
+  process.env.WHATSAPP_GRAPH_VERSION = 'v23.0';
+  // Cuerpo real devuelto por Meta el 2026-08-16, sin el fbtrace_id.
+  globalThis.fetch = (async () =>
+    new Response(
+      JSON.stringify({
+        error: {
+          message: '(#131030) Recipient phone number not in allowed list',
+          code: 131030,
+          type: 'OAuthException',
+        },
+      }),
+      { status: 400 },
+    )) as typeof fetch;
+
+  try {
+    await assert.rejects(
+      () => enviarTexto('573000000000', 'hola'),
+      (error: unknown) => {
+        assert.ok(error instanceof ErrorEnvioMeta);
+        assert.equal(error.estado, 400);
+        assert.equal(error.codigo, META_DESTINO_NO_AUTORIZADO);
+        // El motivo tiene que quedar en el mensaje: con sólo «400» este fallo
+        // costó una sonda manual contra Meta para saber qué pasaba.
+        assert.match(error.message, /not in allowed list/);
+        // El teléfono no puede aparecer en un error que va al log.
+        assert.doesNotMatch(error.message, /573000000000/);
+        return true;
+      },
+    );
+  } finally {
+    globalThis.fetch = anterior.fetch;
+    process.env.WHATSAPP_SEND_ENABLED = anterior.enviar ?? '';
+    process.env.WHATSAPP_TOKEN = anterior.token ?? '';
+    process.env.WHATSAPP_PHONE_NUMBER_ID = anterior.phoneId ?? '';
+    process.env.WHATSAPP_GRAPH_VERSION = anterior.version ?? '';
+  }
 });

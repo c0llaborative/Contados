@@ -1,0 +1,48 @@
+{
+  "evidence_id": "EV-036",
+  "timestamp": "2026-08-16T06:20:00-05:00",
+  "observer": "Claude Opus 5 + logs de Vercel + Graph API de Meta + Upstash Redis",
+  "scope": "Por que un telefono no recibio ninguna respuesta en WhatsApp mientras otro si, y si la persistencia en Redis funciono",
+  "result": "pass",
+  "reported_symptom": "Prueba desde dos telefonos contra el despliegue de produccion: uno conversa normalmente, el otro no recibe absolutamente nada. Sospecha inicial del equipo: la persistencia de sesiones en Redis desplegada esa manana.",
+  "redis_verdict": {
+    "conclusion": "La persistencia en Redis NO es la causa y funciona.",
+    "live_sessions": 2,
+    "evidence": [
+      "Las dos sesiones existen en Redis, una por telefono, con TTL vigente (1761 s y 1376 s de los 1800 s configurados).",
+      "La sesion del telefono que si respondia estaba en estado PREGUNTANDO con rondas=2: el contador solo llega a 2 si la sesion sobrevivio entre mensajes que pudieron caer en instancias distintas. Es justo lo que fallaba antes del arreglo.",
+      "La sesion del telefono silencioso tambien existe (estado ESCUCHANDO): el webhook recibio su mensaje y lo proceso; lo unico que fallo fue la entrega de la respuesta."
+    ],
+    "note": "Los identificadores de sesion son hashes con sal del telefono. No se leyo ni se registro ningun numero."
+  },
+  "root_cause": {
+    "code": 131030,
+    "meta_message": "(#131030) Recipient phone number not in allowed list",
+    "http_status": 400,
+    "explanation": "El remitente es un numero de prueba de Meta Cloud API (verified_name 'Test Number', code_verification_status NOT_VERIFIED). Un numero de prueba solo puede responderle a los telefonos que esten en su lista de destinatarios autorizados. Para cualquier otro telefono, Meta acepta el mensaje entrante -por eso el webhook corre y la sesion se crea- y rechaza la respuesta. La persona no ve un error: ve silencio.",
+    "how_confirmed": [
+      "Log de produccion 2026-08-16 06:06:53 America/Bogota: 'error POST /api/whatsapp' con '[whatsapp] Meta rechazo el envio (400)'.",
+      "GET /{phone_number_id} a Graph v23.0: HTTP 200, verified_name 'Test Number', platform_type CLOUD_API, quality_rating GREEN.",
+      "Sonda de envio a +1 555-011-1111 -un numero 555 de EE. UU., no asignable a una persona real, elegido para no escribirle a nadie-: HTTP 400 con code 131030. Reproduce exactamente el estado del log."
+    ]
+  },
+  "why_it_was_hard_to_see": "El adaptador de salida lanzaba 'Meta rechazo el envio (400)' y descartaba el cuerpo de la respuesta, donde viene el codigo de Meta. En el log un 131030 (lista de autorizados), un 131047 (ventana de 24 h) y un cuerpo mal formado se veian identicos. Hizo falta una sonda manual contra Meta para distinguirlos.",
+  "fix": {
+    "code": [
+      "lib/canales/whatsapp/saliente.ts: nuevo ErrorEnvioMeta que lee el cuerpo de error y conserva estado HTTP y codigo de Meta. El telefono de destino nunca entra en el mensaje del error, que va al log.",
+      "app/api/whatsapp/route.ts: si lo que fallo fue la entrega, ya no se intenta un mensaje de disculpa por el mismo canal -volvia a fallar igual y duplicaba el log-. Ante 131030 se escribe una linea accionable que dice donde se arregla."
+    ],
+    "operational": "El arreglo del sintoma no es de codigo: hay que agregar cada telefono que vaya a probar a la lista de destinatarios en Meta > WhatsApp > API Setup, o pasar a un numero de produccion. Queda declarado en README.md y docs/WHATSAPP.md.",
+    "not_fixable_in_product": "Con un numero de prueba no existe forma de avisarle a la persona que no se le puede responder: el unico canal para avisarle es el que esta bloqueado."
+  },
+  "prior_warning": "El CHANGELOG del 2026-08-16 ya registraba como riesgo aceptado que la consola no mostraba el limite de destinatarios. El riesgo se materializo; ahora el limite esta confirmado y documentado.",
+  "verification": {
+    "tests": "22/22 pass",
+    "typescript": "pass",
+    "next_build": "pass",
+    "routes": 11,
+    "new_test": "Un rechazo 131030 de Meta -con el cuerpo real devuelto ese dia- produce ErrorEnvioMeta con estado 400 y codigo 131030, conserva el motivo en el mensaje y no filtra el telefono."
+  },
+  "privacy": "Cero telefonos leidos, impresos o almacenados. Las credenciales sensibles no se imprimieron; las de Meta se leyeron de .env.local, que esta ignorado. La sonda se dirigio a un numero 555 no asignable.",
+  "interpretation": "Prueba que la persistencia de sesiones en Redis funciona en produccion y que el silencio de un telefono es un limite de la plataforma de Meta, no un defecto del producto. NO prueba que el canal funcione para un telefono arbitrario: mientras el remitente sea un numero de prueba, solo responde a los telefonos registrados. Tampoco prueba vigencia del token mas alla de este momento ni comportamiento con voz humana o relatos reales. Archivo sellado, no editar."
+}

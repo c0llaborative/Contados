@@ -2,6 +2,51 @@
 
 Todas las fechas usan America/Bogota.
 
+## 2026-08-16 — Por qué un teléfono no recibía nada
+
+### Fixed
+
+- `lib/canales/whatsapp/saliente.ts`: el adaptador lanzaba
+  `Meta rechazó el envío (400)` y **descartaba el cuerpo de la respuesta**, que es
+  donde Meta pone el código real. En el log, la lista de destinatarios (`131030`),
+  la ventana de 24 h (`131047`) y un cuerpo mal formado se veían idénticos. Ahora
+  hay un `ErrorEnvioMeta` que conserva estado HTTP y código. El teléfono de
+  destino sigue sin aparecer en el error, que va al log.
+- `app/api/whatsapp/route.ts`: cuando lo que fallaba era la **entrega**, el
+  webhook intentaba mandar un mensaje de disculpa por el mismo canal. Volvía a
+  fallar igual y dejaba dos líneas de error confusas. Ahora no se reintenta, y un
+  `131030` escribe una línea que dice dónde se arregla.
+
+### Diagnosed
+
+- Prueba desde dos teléfonos contra producción: uno conversaba y el otro no
+  recibía **nada**. La sospecha era la persistencia en Redis desplegada esa misma
+  mañana. **No era Redis.** Las dos sesiones estaban vivas en Redis con TTL
+  vigente, y la del teléfono que sí respondía llevaba `rondas=2`, que sólo es
+  posible si la sesión sobrevivió entre mensajes servidos por instancias
+  distintas — exactamente lo que fallaba antes del arreglo.
+- La causa es la plataforma: el remitente es un **número de prueba** de Meta y
+  sólo puede responderle a los teléfonos de su lista de destinatarios
+  autorizados. Al resto, Meta le acepta el mensaje entrante —por eso el webhook
+  corre y la sesión se crea— y le rechaza la respuesta con `131030`. La persona no
+  ve un error: ve silencio. Confirmado con el log de las 06:06:53 y reproducido
+  con una sonda dirigida a un número 555 no asignable. Evidencia sellada en
+  **EV-036**.
+- **No se puede arreglar desde el producto**: el único canal para avisarle a esa
+  persona es el que está bloqueado. Cada teléfono que vaya a probar debe
+  registrarse antes en Meta › WhatsApp › API Setup, o hay que pasar a un número de
+  producción. Queda declarado en el README como límite honesto.
+
+### Verified
+
+- `npm test` 22/22, `npx tsc --noEmit` exit 0, `npm run build` exit 0 con 11
+  rutas. La prueba nueva usa el cuerpo de error real que devolvió Meta ese día.
+
+### Note
+
+- El riesgo aceptado que se registró más abajo —«la consola no muestra el límite
+  de destinatarios»— **se materializó**. Ahora el límite está confirmado.
+
 ## 2026-08-16 — Publicación del repositorio
 
 ### Added

@@ -113,16 +113,32 @@ núcleo no la lleva dentro.
 
 ## Estado de sesión
 
-Un `Map` en memoria del módulo, con TTL. **Sin base de datos.** A esta altura de
-la hackatón una base de datos es riesgo sin premio.
+Una interfaz de almacén con dos implementaciones: un `Map` en memoria —el
+predeterminado, y lo único que necesitan las pruebas y el simulador local— y
+**Redis**, que se usa cuando hay credenciales en el entorno. **Sin base de
+datos relacional.**
+
+Redis entró el 2026-08-16 por un fallo observado en producción, no por
+completitud: en serverless cada mensaje puede caer en una instancia distinta y
+recién arrancada, así que el `Map` desaparecía entre un mensaje y el siguiente.
+La persona mandaba un audio y Contados la volvía a saludar como si no la
+conociera. Se habla con Upstash por su API REST con `fetch`, sin agregar
+dependencias: una petición HTTP por operación, que es lo que conviene en
+funciones serverless.
 
 Consecuencias, documentadas y no escondidas:
 
-- El estado se pierde al reiniciar el proceso o al redesplegar.
-- En serverless (Vercel) el `Map` no se comparte entre instancias. Para el demo
-  con un puñado de números es suficiente; para producción no lo es.
-- Efecto secundario positivo: **nada persiste**. Es una postura de retención
-  defendible, no solo una carencia.
+- **El TTL de 30 minutos ahora lo aplica Redis**, no un chequeo a mano.
+- Dentro de esos 30 minutos **sí persiste** el relato de la persona y su número
+  crudo, que hace falta para poder responderle y avisarle. Después expira solo.
+  La postura de retención sigue siendo «no acumulamos historias»; lo que cambió
+  es que el olvido lo garantiza un TTL y no el reinicio de un proceso. Ver
+  [`SEGURIDAD.md`](SEGURIDAD.md) reglas 13 y 14.
+- La deduplicación y el debounce de 12 s **siguen en memoria**: un redespliegue
+  a mitad de lote lo pierde. Para producción hace falta una cola compartida.
+- El índice por barrio es un conjunto por barrio, porque en Redis no se pueden
+  recorrer las sesiones como se recorría el `Map`. Las entradas ya expiradas se
+  limpian al leerlas.
 
 ## Encender el canal contra Meta
 
@@ -221,9 +237,28 @@ la respuesta lista en vez de quedar en blanco.
 |---|---|---|
 | **Ventana de servicio de 24 h.** Fuera de ella no se puede escribir libre: hace falta una **plantilla aprobada por Meta** | Ninguno: en el demo el usuario acaba de escribir | **Alto.** La notificación proactiva —que es la tesis del producto— necesita plantillas aprobadas |
 | El token de API Setup es temporal; confirmar expiración visible | Generarlo justo antes de probar | Requiere credencial permanente y gobierno de rotación |
-| El número de prueba limita destinatarios; confirmar cantidad visible | Registrar sólo al equipo | Producción requiere alta y verificaciones de Meta |
-| Estado, deduplicación y debounce en memoria | Funciona en una sola instancia; un reinicio pierde el lote | Requiere cola y persistencia compartidas |
+| **El número de prueba sólo le responde a los teléfonos de su lista de destinatarios autorizados** (hasta cinco). Confirmado contra Meta el 2026-08-16: a cualquier otro teléfono, Meta acepta el mensaje entrante y rechaza la respuesta con `131030` | **Alto en el demo.** Quien pruebe desde un teléfono no registrado no recibe **nada**: no hay error visible del lado de la persona. Hay que registrar de antemano cada teléfono que vaya a probar, jurado incluido | Producción requiere alta y verificaciones de Meta; ahí desaparece la lista |
+| Deduplicación y debounce de 12 s en memoria | Funciona en una sola instancia; un reinicio pierde el lote | Requiere cola compartida. El **estado de la conversación** ya no está aquí: vive en Redis desde el 2026-08-16 |
 | Enlace de petición bearer de 15 min | No reenviar ni capturar; expirado se regenera | Requiere política de rotación y, si se necesita revocación individual, almacenamiento servidor |
+
+## Si un teléfono no recibe nada
+
+Pasó el 2026-08-16 en producción: desde un teléfono la conversación funcionaba y
+desde otro no llegaba **ninguna** respuesta. Es el síntoma exacto de la lista de
+destinatarios autorizados, y se distingue de una falla real así:
+
+| Señal | Qué significa |
+|---|---|
+| No hay `POST /api/whatsapp` en los logs | El webhook no está suscrito, o la firma se rechazó (401) |
+| Hay `POST` y `[whatsapp] Meta rechazó el envío (HTTP 400, código 131030)` | El teléfono **no está en la lista de autorizados**. Agréguelo en Meta › WhatsApp › API Setup |
+| Código `190` o HTTP 401 | El token de API Setup expiró; genere uno nuevo y actualice el entorno |
+| Código `131047` | Pasaron más de 24 h desde el último mensaje de la persona; hace falta una plantilla aprobada |
+| Contados saluda de nuevo a mitad de conversación | La sesión se perdió. No debería ocurrir desde el 2026-08-16; revise que `KV_REST_API_URL`/`KV_REST_API_TOKEN` estén en el entorno |
+
+El código de Meta aparece en el log porque el adaptador lo propaga; el teléfono
+nunca aparece. La respuesta rechazada **no se reintenta por el mismo canal**:
+disculparse por WhatsApp cuando WhatsApp es justamente lo que falla vuelve a
+fallar igual.
 
 ## Contingencia para el video
 
