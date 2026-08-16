@@ -21,8 +21,11 @@ export function Notificador({ barrios }: { barrios: string[] }) {
       });
       const data = (await response.json()) as { afectados?: number; error?: string };
       if (!response.ok) throw new Error(data.error || 'No se pudo crear el aviso.');
+      const n = data.afectados ?? 0;
       setResultado(
-        `${data.afectados ?? 0} conversación(es) del barrio recibieron el aviso en el simulador. No se envió nada a Meta.`,
+        n === 1
+          ? '1 familia del barrio recibió el aviso en el simulador. No se envió nada por WhatsApp.'
+          : `${n} familias del barrio recibieron el aviso en el simulador. No se envió nada por WhatsApp.`,
       );
     } catch (error) {
       setResultado(error instanceof Error ? error.message : 'No se pudo crear el aviso.');
@@ -34,9 +37,14 @@ export function Notificador({ barrios }: { barrios: string[] }) {
   return (
     <section className="mt-12 border-2 p-5" style={{ borderColor: 'var(--ink)', background: 'var(--paper-raised)' }}>
       <p className="folio" style={{ color: 'var(--signal)' }}>Cerrar el círculo</p>
-      <h2 className="display mt-2 text-2xl">Avisar cuando la atención llegue al barrio</h2>
-      <p className="mt-2" style={{ color: 'var(--ink-soft)' }}>
-        En la demo, el aviso queda en la sesión del simulador. El envío real por Meta está bloqueado hasta que un operador lo autorice.
+      <h2 className="display mt-2 text-2xl">Avisarle a un barrio que ya le toca</h2>
+      <p className="mt-2 text-[1.0625rem] leading-relaxed">
+        La familia no vuelve a preguntar: el municipio le avisa. Es la diferencia entre
+        un portal que hay que consultar y un mensaje que llega.
+      </p>
+      <p className="mt-2 text-[0.9375rem]" style={{ color: 'var(--ink-soft)' }}>
+        En esta demostración el aviso llega al simulador. El envío real por WhatsApp
+        exige que un operador lo autorice.
       </p>
       <label className="folio mt-5 block">Barrio</label>
       <select className="mt-1 w-full border-2 p-3 text-base" value={barrio} onChange={(e) => setBarrio(e.target.value)}>

@@ -44,9 +44,9 @@ export default function Tablero() {
           className="mt-4 text-[1.0625rem] leading-relaxed"
           style={{ color: 'var(--ink-soft)' }}
         >
-          Esta es la cifra que hoy no existe: cuántos hogares están detenidos en
-          cada paso de la ruta. No la produce ninguna entidad — la producen las
-          personas al contar su caso.
+          Cuántos hogares están detenidos en cada paso de la ruta, y en qué
+          barrios. Es la cifra que hoy no produce ninguna entidad — la producen
+          las personas al contar su caso.
         </p>
       </header>
 
@@ -60,20 +60,32 @@ export default function Tablero() {
         </p>
         <p className="mt-1.5 text-[1.0625rem] leading-snug">
           Cifras <strong>autorreportadas</strong> por quienes usaron Contados. No son
-          cifras oficiales ni un censo. Sirven para ver dónde se acumula la fila, no
-          para contar damnificados.
+          cifras oficiales ni un censo, y no dicen cuántos damnificados hay. Dicen
+          dónde se está acumulando la fila.
         </p>
         <p className="mt-2 text-[0.9375rem]" style={{ color: 'var(--ink-soft)' }}>
           En esta demostración son {total} casos sintéticos. Ninguna persona real.
         </p>
       </aside>
 
-      {/* El hallazgo, arriba */}
+      {/* El hallazgo, arriba. La cifra manda: se lee antes que la frase. */}
       <section className="mt-10">
         <p className="folio">El cuello de botella</p>
-        <p className="display mt-2 text-2xl leading-snug">
-          {Math.round((cuello.n / total) * 100)}% de los hogares está detenido en
-          «{COMPUERTA_LABEL[cuello.compuerta]}».
+        <div className="lift mt-2 flex items-baseline gap-3">
+          <span
+            className="display text-[3.75rem] leading-none tabular-nums"
+            style={{ color: 'var(--signal)' }}
+          >
+            {Math.round((cuello.n / total) * 100)}%
+          </span>
+          <span className="display text-xl leading-tight">
+            de los hogares está
+            <br />
+            detenido en un solo paso
+          </span>
+        </div>
+        <p className="display mt-3 text-2xl leading-snug">
+          «{COMPUERTA_LABEL[cuello.compuerta]}»
         </p>
         <p
           className="mt-3 text-[1.0625rem] leading-relaxed"
@@ -137,9 +149,13 @@ export default function Tablero() {
       <section className="mt-12">
         <div className="rule-double mb-6" />
         <p className="folio mb-1">Por barrio</p>
+        <p className="mb-2 text-[1.0625rem] font-bold">
+          A dónde mandar los ingenieros primero.
+        </p>
         <p className="mb-5 text-[1rem]" style={{ color: 'var(--ink-soft)' }}>
-          Cuántos hogares esperan la visita técnica en cada barrio. Es el orden en que
-          convendría enviar a los ingenieros.
+          Barrios ordenados por cuántos hogares llevan más tiempo esperando la visita
+          técnica. No reemplaza el criterio de la Unidad de Gestión del Riesgo: le
+          agrega el dato que hoy le falta.
         </p>
         <table className="w-full text-[1.0625rem]">
           <thead>
@@ -216,11 +232,11 @@ export default function Tablero() {
         style={{ borderColor: 'var(--rule)', color: 'var(--ink-faint)' }}
       >
         <Link
-          href="/"
+          href="/whatsapp"
           className="mb-4 inline-block border-b-2 text-[1.0625rem] font-bold"
           style={{ borderColor: 'var(--signal)', color: 'var(--ink)' }}
         >
-          ← Ver en qué voy yo
+          ← Ver lo que recibe la familia
         </Link>
         <p>
           Contados no es un canal oficial. Estas cifras son autorreportadas y no
