@@ -33,17 +33,21 @@ otro documento, gana este.
 
 ### 2026-08-16 — Enlace del video incorporado
 
-- Status: `HECHO LOCAL · PUSH PENDIENTE`.
+- Status: `HECHO · PUBLICADO`.
 - Completed: el marcador `#` del enlace `Video de 1 minuto` fue reemplazado por
   la URL de YouTube suministrada; el changelog se actualizó en el mismo cambio.
 - Verified: inspección local confirma una aparición de la URL exacta en el
-  README y ninguna aparición del marcador anterior.
+  README y ninguna aparición del marcador anterior; `git diff --check` terminó
+  con exit 0; commit `7d7c2c9` publicado en `origin/main`
+  (`5988b40..7d7c2c9`). La disponibilidad y el contenido del video permanecen
+  como evidencia reportada por el equipo: el entorno no pudo inspeccionarlos.
 - Decisions: conservar la URL completa suministrada, incluido su parámetro
   `si`, para no alterar el entregable indicado por el equipo.
 - Safety: sólo se modificó documentación rastreada; no se tocó la aplicación,
   el despliegue, secretos ni las carpetas locales no rastreadas.
-- Remaining/blocker: ejecutar el gate documental, crear el commit y hacer push.
-- Next action: revisión de diff y calidad; luego commit y push a `origin/main`.
+- Remaining/blocker: ninguno para esta entrega.
+- Next action: ninguno; sólo actualizar el vínculo si el equipo sustituye el
+  video entregable.
 - Owner: Codex.
 
 ## HISTORICAL · alcance autorizado al iniciar esta implementación
