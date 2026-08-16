@@ -261,11 +261,19 @@ funcionan como iconos:
 | `Riesgo de quedar por fuera: …` | `*⚠️ Riesgo de quedar por fuera*` y `👉 *Pida esto:*` con la acción |
 | Saludo | Los tres avisos obligatorios en líneas propias, no enterrados en un párrafo |
 | Borrador de petición | Titular, enlace en línea aparte, y el plazo y el «no lo radica por usted» en cursiva |
+| Aviso de barrio | `*📣 Aviso de su barrio*` primero. Llega sin que la persona haya preguntado nada, así que lo primero es de dónde viene |
+| Abstención tras tres preguntas | Titular, qué hacer, y `_No voy a inventar un paso._` en línea propia. Esa promesa sostiene el producto y no puede quedar enterrada al final de un párrafo |
 
 Dos reglas que no se negocian: **no se reescribe ni se resume nada** —sólo se
 separa lo que el núcleo ya distingue— y si un prefijo no coincide, el mensaje
 sale tal cual. Las preguntas de abstención salen sin tocar: ya son una línea
 corta y no ganan nada con jerarquía.
+
+El simulador ganó las dos tarjetas que le faltaban para quedar parejo: el
+seguimiento (`Sigue en: …`) y el aviso de barrio. El prefijo del aviso vive en
+`lib/nucleo/schema.ts` y no en `conversacion.ts`, porque el simulador es un
+componente de cliente y no puede arrastrar el clasificador ni el almacén sólo
+para leer una constante.
 
 Los círculos del riel son emoji estándar a propósito. Los caracteres de bloque
 (`▰▱`) se ven bien en un escritorio y se rompen en teléfonos de gama baja, que

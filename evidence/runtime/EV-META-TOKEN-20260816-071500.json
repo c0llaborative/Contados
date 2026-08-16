@@ -1,0 +1,36 @@
+{
+  "evidence_id": "EV-038",
+  "timestamp": "2026-08-16T07:15:00-05:00",
+  "observer": "Claude Opus 5 + logs de Vercel + Graph API de Meta",
+  "scope": "Segundo reporte de 'no responde' tras el despliegue, y segunda pasada de legal design sobre lo que quedaba sin maquetar",
+  "result": "pass en diagnostico; accion operativa abierta",
+  "incident": {
+    "reported": "Se envio un mensaje al canal real y no respondio.",
+    "log_line": "[whatsapp] Meta rechazo el envio (HTTP 403, codigo 131005): (#131005) Access denied",
+    "occurrences": "06:48:44, 06:49:06, 06:53:36 y 06:53:41 America/Bogota",
+    "different_from_previous": "No es 131030. A las 06:06 el mismo despliegue devolvia 131030, lo que prueba que sus credenciales entonces eran validas y que solo estaba bloqueado el destinatario.",
+    "root_cause": "El token desplegado quedo invalidado. Las variables de Vercel no se han tocado en 2 horas, pero .env.local fue modificado a las 06:53:23, dentro de la ventana de fallos: el equipo genero un token nuevo en la consola de Meta mientras agregaba telefonos a la lista de autorizados, y generar un token de API Setup invalida el anterior. Produccion se quedo con el viejo.",
+    "confirmation": "Sonda con el token de .env.local contra el mismo phone_number_id: HTTP 400 con codigo 131030, es decir token valido y destinatario bloqueado. El token nuevo funciona; el desplegado no.",
+    "fix": "Operativo, no de codigo: sincronizar WHATSAPP_TOKEN a produccion y redesplegar. La escritura de secretos en el entorno desplegado quedo fuera del alcance automatico y la ejecuta el equipo.",
+    "note_on_instrumentation": "Este diagnostico tomo minutos y no una sonda manual porque el arreglo de EV-036 ya propaga el codigo de Meta al log. Antes, 131005 y 131030 se veian ambos como 'Meta rechazo el envio (400)'."
+  },
+  "legal_design_second_pass": {
+    "why": "Peticion explicita del equipo: aplicar legal design a todo lo que se pueda, no solo al diagnostico.",
+    "covered_now": [
+      "Aviso de barrio: abre con '*📣 Aviso de su barrio*'. Llega sin que la persona haya preguntado nada, asi que lo primero es de donde viene.",
+      "Abstencion tras tres preguntas: '_No voy a inventar un paso._' queda en linea propia. Esa promesa sostiene el producto y estaba enterrada al final de un parrafo de tres frases.",
+      "Mensaje de error del webhook: dejo de ser una linea corrida y aclara que no se perdio ningun turno.",
+      "Simulador: gana las dos tarjetas que le faltaban para quedar parejo con WhatsApp, seguimiento y aviso de barrio."
+    ],
+    "structural_change": "PREFIJO_AVISO_BARRIO se movio a lib/nucleo/schema.ts. El simulador es un componente de cliente y no puede arrastrar el clasificador ni el almacen solo para leer una constante.",
+    "unchanged_on_purpose": "Las preguntas de abstencion salen sin tocar: ya son una linea corta y no ganan nada con jerarquia."
+  },
+  "verification": {
+    "tests": "28/28 pass",
+    "typescript": "pass",
+    "next_build": "pass",
+    "routes": 11
+  },
+  "privacy": "Cero telefonos leidos o registrados. Ningun valor de credencial se imprimio; la unica lectura de .env.local fue su fecha de modificacion y la longitud de los valores.",
+  "interpretation": "Prueba que el segundo silencio tuvo una causa distinta al primero y que el log ya la dice solo. NO prueba que el canal responda: mientras el token desplegado no se sincronice, todo envio seguira devolviendo 131005, y una vez sincronizado seguira aplicando la lista de destinatarios autorizados de EV-036. Archivo sellado, no editar."
+}

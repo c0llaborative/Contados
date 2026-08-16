@@ -21,9 +21,10 @@ import {
   COMPUERTAS,
   COMPUERTA_EXPLICACION,
   COMPUERTA_LABEL,
+  PREFIJO_AVISO_BARRIO,
   type Compuerta,
 } from '../../nucleo/schema';
-import { SALUDO } from '../../nucleo/conversacion';
+import { SALUDO, SIN_UBICACION } from '../../nucleo/conversacion';
 
 const PREFIJO_PASO = 'Su caso parece estar en: ';
 const PREFIJO_SIGUE = 'Sigue en: ';
@@ -125,6 +126,24 @@ function tarjetaSaludo() {
   ].join('\n');
 }
 
+/**
+ * Aviso que manda un coordinador a un barrio. Llega sin que la persona haya
+ * preguntado nada, así que lo primero tiene que ser de dónde viene.
+ */
+function tarjetaAvisoBarrio(cuerpo: string) {
+  return `*📣 Aviso de su barrio*\n${cuerpo.trim()}`;
+}
+
+/**
+ * La abstención. Son tres frases con tres funciones distintas —qué pasa, qué
+ * hacer, y la promesa de no inventar— y corridas se leen como una disculpa.
+ * Separadas, la última queda donde se ve.
+ */
+function tarjetaSinUbicacion() {
+  const [titular, accion, promesa] = SIN_UBICACION.split('. ');
+  return `*${titular}*\n${accion}.\n\n_${promesa}_`;
+}
+
 function tarjetaCierre(texto: string) {
   const corte = texto.indexOf('Recuerde: ');
   if (corte === -1) return texto;
@@ -138,6 +157,10 @@ function tarjetaCierre(texto: string) {
  */
 export function formatearParaWhatsApp(texto: string): string {
   if (texto === SALUDO) return tarjetaSaludo();
+  if (texto === SIN_UBICACION) return tarjetaSinUbicacion();
+  if (texto.startsWith(PREFIJO_AVISO_BARRIO)) {
+    return tarjetaAvisoBarrio(texto.slice(PREFIJO_AVISO_BARRIO.length));
+  }
   if (texto.startsWith(PREFIJO_PASO)) {
     return tarjetaPaso(texto.slice(PREFIJO_PASO.length), 'Su caso va aquí') ?? texto;
   }

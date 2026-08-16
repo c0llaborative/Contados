@@ -12,6 +12,16 @@
  */
 
 /** Las cuatro compuertas más el estado terminal. El orden importa: es una fila. */
+/**
+ * Prefijo de los avisos que manda un coordinador a un barrio. Vive aquí, y no
+ * en `conversacion.ts`, porque el simulador es un componente de cliente y no
+ * puede arrastrar el clasificador ni el almacén para leer una constante.
+ *
+ * Existe para que cada superficie los presente como lo que son —un mensaje que
+ * llega sin que la persona haya preguntado nada— y no como una respuesta.
+ */
+export const PREFIJO_AVISO_BARRIO = 'Aviso de su barrio: ';
+
 export const COMPUERTAS = [
   'reporte',
   'censo',

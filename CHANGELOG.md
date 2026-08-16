@@ -37,11 +37,22 @@ Todas las fechas usan America/Bogota.
   caracteres de bloque se rompen en teléfonos de gama baja, que son los de esta
   gente.
 
+- Segunda pasada, a pedido: el legal design cubre ahora **todo** lo que sale por
+  el canal. El aviso de barrio abre con `*📣 Aviso de su barrio*` —llega sin que
+  la persona haya preguntado nada, así que lo primero es de dónde viene—; la
+  abstención deja `_No voy a inventar un paso._` en línea propia, porque esa
+  promesa sostiene el producto y estaba enterrada al final de un párrafo; y el
+  mensaje de error dejó de ser una línea corrida. El simulador ganó las dos
+  tarjetas que le faltaban para quedar parejo: seguimiento y aviso de barrio.
+- El prefijo del aviso se movió a `lib/nucleo/schema.ts`: el simulador es un
+  componente de cliente y no puede arrastrar el clasificador ni el almacén sólo
+  para leer una constante.
+
 ### Verified
 
-- `npm test` 26/26, `npx tsc --noEmit` exit 0, `npm run build` exit 0 con 11
-  rutas. Cuatro pruebas nuevas, todas fallarían con el código anterior. El
-  render se comprobó contra la ruta real de Manizales. Evidencia **EV-037**.
+- `npm test` 28/28, `npx tsc --noEmit` exit 0, `npm run build` exit 0 con 11
+  rutas. Seis pruebas nuevas, todas fallarían con el código anterior. El render
+  se comprobó contra la ruta real de Manizales. Evidencia **EV-037**.
 
 ### Not verified
 

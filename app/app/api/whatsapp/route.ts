@@ -71,7 +71,7 @@ const agrupador = crearAgrupador<MensajeMeta>(async (entradas) => {
       try {
         await enviarTexto(
           destino,
-          'No pudimos procesar su mensaje en este momento. Intente enviarlo de nuevo o use la ruta web de Contados.',
+          '*No pudimos procesar su mensaje*\nIntente enviarlo de nuevo, o use la ruta web de Contados.\n\n_No perdió su turno: esto no afecta ningún trámite._',
         );
       } catch (sendError) {
         console.error('[whatsapp-send]', sendError instanceof Error ? sendError.message : 'error');

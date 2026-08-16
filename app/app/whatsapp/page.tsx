@@ -2,7 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
-import { COMPUERTAS, COMPUERTA_LABEL } from '@/lib/schema';
+import { COMPUERTAS, COMPUERTA_LABEL, PREFIJO_AVISO_BARRIO } from '@/lib/schema';
 
 type Chat = {
   de: 'persona' | 'contados';
@@ -198,8 +198,10 @@ function esEstructurado(texto: string) {
   return (
     comoPeticion(texto) !== null ||
     texto.startsWith('Su caso parece estar en: ') ||
+    texto.startsWith('Sigue en: ') ||
     texto.startsWith('Qué hacer ahora: ') ||
     texto.startsWith('Riesgo de quedar por fuera: ') ||
+    texto.startsWith(PREFIJO_AVISO_BARRIO) ||
     texto.startsWith('⚠️')
   );
 }
@@ -207,7 +209,13 @@ function esEstructurado(texto: string) {
 function Contenido({ texto, mostrado }: { texto: string; mostrado: string }) {
   const peticion = comoPeticion(texto);
   if (peticion) return <TarjetaPeticion url={peticion.url} cierre={peticion.cierre} />;
-  if (texto.startsWith('Su caso parece estar en: ')) return <TarjetaPaso texto={texto} />;
+  if (texto.startsWith('Su caso parece estar en: ')) {
+    return <TarjetaPaso texto={texto} prefijo="Su caso parece estar en: " etiqueta="Su caso va aquí" />;
+  }
+  if (texto.startsWith('Sigue en: ')) {
+    return <TarjetaPaso texto={texto} prefijo="Sigue en: " etiqueta="Sigue en el mismo paso" />;
+  }
+  if (texto.startsWith(PREFIJO_AVISO_BARRIO)) return <TarjetaAviso texto={texto} />;
   if (texto.startsWith('Qué hacer ahora: ')) return <TarjetaAccion texto={texto} />;
   if (texto.startsWith('Riesgo de quedar por fuera: ')) return <TarjetaRiesgo texto={texto} />;
   if (texto.startsWith('⚠️')) return <TarjetaEstafa texto={texto} />;
@@ -220,8 +228,16 @@ function Contenido({ texto, mostrado }: { texto: string; mostrado: string }) {
  * párrafo. No reescribe ni resume: si un prefijo no coincide, el mensaje cae
  * al render de texto plano y no se pierde nada.
  */
-function TarjetaPaso({ texto }: { texto: string }) {
-  const resto = texto.slice('Su caso parece estar en: '.length);
+function TarjetaPaso({
+  texto,
+  prefijo,
+  etiqueta,
+}: {
+  texto: string;
+  prefijo: string;
+  etiqueta: string;
+}) {
+  const resto = texto.slice(prefijo.length);
   const compuerta = COMPUERTAS.find((c) => resto.startsWith(`${COMPUERTA_LABEL[c]}.`));
   if (!compuerta) return <>{texto}</>;
 
@@ -231,7 +247,7 @@ function TarjetaPaso({ texto }: { texto: string }) {
   return (
     <>
       <p className="wa-etiqueta" style={{ color: 'var(--signal)' }}>
-        Su caso va aquí
+        {etiqueta}
       </p>
       <div className="wa-pasos" role="img" aria-label={`Paso ${indice + 1} de 5`}>
         {COMPUERTAS.map((c, i) => (
@@ -248,7 +264,22 @@ function TarjetaPaso({ texto }: { texto: string }) {
         ))}
       </div>
       <p className="wa-titular">{COMPUERTA_LABEL[compuerta]}</p>
-      <p className="wa-detalle">{detalle}</p>
+      {detalle && <p className="wa-detalle">{detalle}</p>}
+    </>
+  );
+}
+
+/**
+ * Aviso que manda un coordinador a un barrio. Llega sin que la persona haya
+ * preguntado nada, así que lo primero es de dónde viene.
+ */
+function TarjetaAviso({ texto }: { texto: string }) {
+  return (
+    <>
+      <p className="wa-etiqueta" style={{ color: 'var(--signal)' }}>
+        📣 Aviso de su barrio
+      </p>
+      <p className="wa-titular">{texto.slice(PREFIJO_AVISO_BARRIO.length)}</p>
     </>
   );
 }

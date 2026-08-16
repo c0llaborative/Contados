@@ -4,6 +4,7 @@ import { clasificar as clasificarReal } from './clasificar';
 import {
   COMPUERTA_EXPLICACION,
   COMPUERTA_LABEL,
+  PREFIJO_AVISO_BARRIO,
   RIESGO_LABEL,
   type Compuerta,
   type Diagnostico,
@@ -48,6 +49,10 @@ interface Sesion {
 
 export const SALUDO =
   'Soy Contados. Le ayudo a entender en qué paso de la ruta de atención va y qué puede hacer. Esto no lo registra ante ninguna entidad. Nunca le pediremos cédula, datos bancarios ni huella; registrarse en el censo es gratis. Cuénteme qué pasó: puede escribir o mandar una nota de voz.';
+
+/** Cuando ni con tres preguntas alcanza. Se abstiene y lo dice. */
+export const SIN_UBICACION =
+  'Con lo que me contó no puedo ubicarlo con seguridad. Confirme su caso con la Unidad de Gestión del Riesgo de su alcaldía. No voy a inventar un paso.';
 
 const TTL_MS = 30 * 60 * 1000;
 export const MAX_RELATO_CARACTERES = 5000;
@@ -197,7 +202,7 @@ export function crearConversador(
     if (sesion.estado === 'PREGUNTANDO' && sesion.rondas >= 3) {
       sesion.estado = 'SEGUIMIENTO';
       mensajes.push(
-        'Con lo que me contó no puedo ubicarlo con seguridad. Confirme su caso con la Unidad de Gestión del Riesgo de su alcaldía. No voy a inventar un paso.',
+        SIN_UBICACION,
       );
       await guardar();
       return { estado: sesion.estado, mensajes };
@@ -246,7 +251,7 @@ export function crearConversador(
     const destinatarios: { sesionId: string; destinatarioTemporal?: string }[] = [];
     for (const { id: sesionId, sesion } of await almacen.porBarrio(barrio)) {
       if (sesion.estado === 'SEGUIMIENTO') {
-        sesion.pendientes.push(mensaje);
+        sesion.pendientes.push(`${PREFIJO_AVISO_BARRIO}${mensaje}`);
         await almacen.escribir(sesionId, sesion, TTL_MS);
         destinatarios.push({ sesionId, destinatarioTemporal: sesion.destinatarioTemporal });
       }

@@ -11,10 +11,15 @@ import {
 } from '../lib/canales/whatsapp/saliente';
 import { MAX_AUDIO_BYTES, transcribirAudio } from '../lib/canales/whatsapp/transcribir';
 import { almacenEnMemoria } from '../lib/nucleo/almacen-sesiones';
-import { crearConversador, ErrorLimiteConversacion, SALUDO } from '../lib/nucleo/conversacion';
+import {
+  crearConversador,
+  ErrorLimiteConversacion,
+  SALUDO,
+  SIN_UBICACION,
+} from '../lib/nucleo/conversacion';
 import { asegurarInvariantes } from '../lib/nucleo/clasificar';
 import { crearMensajeEnlacePeticion } from '../lib/nucleo/enlace-peticion';
-import { DIAGNOSTICO_SCHEMA, type Diagnostico } from '../lib/nucleo/schema';
+import { DIAGNOSTICO_SCHEMA, PREFIJO_AVISO_BARRIO, type Diagnostico } from '../lib/nucleo/schema';
 import {
   crearTokenPeticion,
   ErrorTokenPeticion,
@@ -560,4 +565,35 @@ test('el formato de WhatsApp no altera el contenido legal del saludo ni de la pe
   assert.match(peticion, /https:\/\/contados\.vercel\.app\/api\/peticion\/abc/);
   assert.match(peticion, /15 minutos/);
   assert.match(peticion, /no lo radica por usted/);
+});
+
+test('el aviso de barrio y la abstención también llegan maquetados', () => {
+  const aviso = formatearParaWhatsApp(
+    `${PREFIJO_AVISO_BARRIO}La brigada de evaluación llega mañana al barrio San José.`,
+  );
+  // Un aviso llega sin que la persona haya preguntado nada: lo primero tiene
+  // que ser de dónde viene.
+  assert.match(aviso, /^\*📣 Aviso de su barrio\*/);
+  assert.match(aviso, /La brigada de evaluación llega mañana al barrio San José\./);
+
+  const abstencion = formatearParaWhatsApp(SIN_UBICACION);
+  assert.match(abstencion, /^\*Con lo que me contó no puedo ubicarlo con seguridad\*/);
+  // La promesa de no inventar es lo que sostiene el producto: no puede quedar
+  // enterrada al final de un párrafo.
+  assert.match(abstencion, /_No voy a inventar un paso\._$/);
+});
+
+test('el aviso por barrio se guarda con su prefijo, para que cada superficie lo presente', async () => {
+  const almacen = almacenEnMemoria();
+  const clasificador = async () => ({ ...base, compuerta: 'censo' as const, razon: 'x' });
+  const chat = crearConversador(clasificador, Date.now, almacen);
+  await chat.conversar({
+    sesionId: 'sim_avisoconprefijo12',
+    texto: 'Vino una señora y anotó en un cuaderno',
+    municipio: 'Manizales',
+    barrio: 'San José',
+  });
+  await chat.notificarBarrio('San José', 'La brigada llega mañana.');
+  const avisos = await chat.conversar({ sesionId: 'sim_avisoconprefijo12', texto: '' });
+  assert.ok(avisos.mensajes.some((m) => m.startsWith(PREFIJO_AVISO_BARRIO)));
 });
