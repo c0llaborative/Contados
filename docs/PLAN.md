@@ -5,8 +5,8 @@
 - Owner: equipo de hackathon
 - **Cierre de entregas: domingo 16 a las 09:00.**
 - Repositorio público: <https://github.com/c0llaborative/contados>
-- **Siguiente acción exacta:** ninguno para esta entrega. Si el equipo sustituye
-  el video, deberá proporcionar la nueva URL para publicar un commit correctivo.
+- **Siguiente acción exacta:** revisar el diff documental, crear el commit y
+  publicarlo en `origin/main`. Codex es owner.
 - Track: **02 — Justicia** (defendible también en 01; ver
   [ADR 0005](adr/0005-contados.md))
 - Entregables: **repositorio** + **video de 60 segundos**.
@@ -14,10 +14,43 @@
 Este documento es la fuente de verdad sobre el estado. Si algo aquí contradice
 otro documento, gana este.
 
+## CURRENT · acceso directo a la demo desplegada
+
+- Problema e impacto: la sección principal de prueba obligaba al lector a
+  instalar y configurar el proyecto aunque la aplicación ya está desplegada.
+- Alcance: hacer de la URL de Vercel la entrada principal y adaptar los cuatro
+  pasos a enlaces reales; no se modifica código, configuración ni despliegue.
+- Seguridad y recuperación: cambio exclusivamente documental y reversible; no
+  se hacen escrituras externas distintas del push solicitado.
+- Aceptación: el README enlaza la raíz, `/whatsapp` y `/tablero` desplegados; ya
+  no presenta la instalación local como recorrido principal; `git diff --check`
+  pasa; sólo cambian README, changelog y plan; `origin/main` recibe el cambio.
+- Verificación prevista: abrir la web pública, comprobar URL y destinos del
+  README, revisar el diff y comparar el commit local con el remoto.
+- Owner: Codex.
+
+### 2026-08-16 — Demo desplegada como ruta principal del README
+
+- Status: `HECHO LOCAL · PUSH PENDIENTE`.
+- Completed: la sección eliminó el bloque de instalación local y enlaza la raíz,
+  el simulador de WhatsApp y el tablero desplegados en Vercel.
+- Verified: navegador público — raíz con título `Contados — ¿en qué va su
+  ayuda?`; `/whatsapp` con encabezado `¿En qué va su ayuda?`; `/tablero` con
+  título `Contados — dónde se detiene la gente`; los tres destinos están en el
+  Markdown y `git diff --check` terminó con exit 0.
+- Decisions: conservar los cuatro pasos de la demostración y cambiar sólo sus
+  puntos de entrada, para que el jurado pueda probar el mismo flujo sin preparar
+  un entorno local.
+- Safety: cero cambios en código, configuración, secretos o despliegue; las
+  carpetas locales `Video-demo/` y `Video-final/` permanecen fuera del alcance.
+- Remaining/blocker: gate documental, commit y push.
+- Next action: ejecutar el gate, crear el commit y publicar en `origin/main`.
+- Owner: Codex.
+
 ## CURRENT · publicación del video entregable
 
-- Problema e impacto: el README público conservaba un marcador `#`, por lo que el
-  jurado no puede abrir el video entregable desde el repositorio.
+- Problema e impacto: el README público conservaba un marcador `#`, lo que
+  impedía abrir el video entregable desde el repositorio.
 - Alcance: reemplazar ese marcador por el enlace de YouTube suministrado por el
   equipo y actualizar la documentación visible del cambio. No se modifica el
   video, la aplicación, el despliegue ni las carpetas locales no rastreadas.

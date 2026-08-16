@@ -85,21 +85,16 @@ El artefacto y su SHA-256 están sellados en
 
 ## Probarlo en un minuto
 
-```bash
-cd app
-cp .env.example .env.local     # pegue ANTHROPIC_API_KEY
-npm install && npm run dev
-```
+La demo pública está en **[contados.vercel.app](https://contados.vercel.app/)**.
+No requiere instalación ni configuración local.
 
-Luego, en <http://localhost:3000>:
-
-1. Abra **`/whatsapp`** y toque el micrófono. Suenan dos notas de voz sintéticas
-   y aparece su transcripción — se transcriben de verdad, no están escritas a
-   mano.
+1. Abra el **[simulador de WhatsApp](https://contados.vercel.app/whatsapp)** y
+   toque el micrófono. Suenan dos notas de voz sintéticas y aparece su
+   transcripción — se transcriben de verdad, no están escritas a mano.
 2. Contados responde: el paso, qué hacer y dónde, el riesgo de quedar por fuera,
    y el borrador del derecho de petición.
-3. Abra **`/tablero`** *en otra pestaña*, elija el barrio **San José** y pulse
-   **Notificar en la demo**.
+3. Abra el **[tablero](https://contados.vercel.app/tablero)** *en otra pestaña*,
+   elija el barrio **San José** y pulse **Notificar en la demo**.
 4. Vuelva al simulador y pulse **Revisar avisos del barrio**.
 
 El simulador no es una maqueta: invoca **el mismo handler** que el webhook de

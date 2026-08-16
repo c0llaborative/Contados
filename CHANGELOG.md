@@ -2,6 +2,20 @@
 
 Todas las fechas usan America/Bogota.
 
+## 2026-08-16 — La prueba de un minuto abre la web real
+
+### Changed
+
+- La sección `Probarlo en un minuto` del README dejó de presentar la instalación
+  local como entrada principal y ahora enlaza directamente la demo desplegada,
+  el simulador de WhatsApp y el tablero en `contados.vercel.app`.
+
+### Verified
+
+- La raíz, `/whatsapp` y `/tablero` cargaron en el navegador público con los
+  títulos y encabezados esperados. La revisión local confirmó los tres destinos
+  exactos en el Markdown y `git diff --check` terminó con exit 0.
+
 ## 2026-08-16 — Video entregable publicado en el README
 
 ### Changed
