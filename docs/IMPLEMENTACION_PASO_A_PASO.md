@@ -23,7 +23,7 @@ cuándo detenerse.
 | 3 | STT Groq | `HECHO` | Equipo + Codex | ZDR observado + audio sintético pasa |
 | 4 | Secretos de WhatsApp | `HECHO` | Codex | Cuatro valores aleatorios y separados |
 | 5 | Meta Developer | `HECHO CON RIESGO` | Equipo | Credenciales válidas; sin 2FA y sin expiración visible |
-| 6 | Repositorio y despliegue | `EN CURSO` | Equipo + Codex | URL HTTPS vinculada a commit identificado |
+| 6 | Repositorio y despliegue | Repo `HECHO`; despliegue `PENDIENTE` | Equipo + Codex | URL HTTPS vinculada a commit identificado |
 | 7 | Webhook Meta | `PENDIENTE` | Equipo + Codex | Challenge aceptado con envío apagado |
 | 8 | Meta extremo a extremo | `PENDIENTE` | Equipo + Codex | Saludo, P0, estafa y audio pasan |
 | 9 | Notificación | `HECHO EN SIMULADOR`; real pendiente | Equipo + Codex | Barrio correcto recibe el aviso |

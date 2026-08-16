@@ -277,8 +277,14 @@ paso 9 (el video).
 - Decision: se ejecuta el orden de corte que el propio plan ya fijaba. Publicar
   el repositorio primero, grabar el video con el simulador enseguida, y sólo
   intentar Vercel y Meta con el tiempo que sobre.
-- Next action: commit, crear el repositorio público, push y desplegar.
-- Owners: Codex para git, higiene y despliegue; equipo para aprobar y para cargar
+- Repositorio publicado 2026-08-16 02:05: **https://github.com/c0llaborative/contados**,
+  público, en dos commits (`face9ed` el canal, `682dd52` licencia y evidencia).
+  Machine-verified tras el push: el único archivo de entorno en el remoto es
+  `app/.env.example`, sin valores; GitHub detecta la licencia como AGPL-3.0.
+- Status parcial Gate 6: repositorio `HECHO`; despliegue `PENDIENTE`.
+- Next action: el equipo graba el video con el simulador —es el entregable
+  calificado y el reloj corre—; el despliegue en Vercel queda después.
+- Owners: Codex para git, higiene y despliegue; equipo para grabar y para cargar
   las variables de entorno en Vercel.
 
 ### 2026-08-16 — Gate 5 iniciado: preparar credenciales de Meta
