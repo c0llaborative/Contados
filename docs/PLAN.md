@@ -5,8 +5,8 @@
 - Owner: equipo de hackathon
 - **Cierre de entregas: domingo 16 a las 09:00.**
 - Repositorio público: <https://github.com/c0llaborative/contados>
-- **Siguiente acción exacta:** revisar el diff documental, crear el commit y
-  publicarlo en `origin/main`. Codex es owner.
+- **Siguiente acción exacta:** ninguno para esta entrega. Si cambia la URL del
+  despliegue, el equipo debe suministrar el nuevo destino para actualizarla.
 - Track: **02 — Justicia** (defendible también en 01; ver
   [ADR 0005](adr/0005-contados.md))
 - Entregables: **repositorio** + **video de 60 segundos**.
@@ -31,20 +31,21 @@ otro documento, gana este.
 
 ### 2026-08-16 — Demo desplegada como ruta principal del README
 
-- Status: `HECHO LOCAL · PUSH PENDIENTE`.
+- Status: `HECHO · PUBLICADO`.
 - Completed: la sección eliminó el bloque de instalación local y enlaza la raíz,
   el simulador de WhatsApp y el tablero desplegados en Vercel.
 - Verified: navegador público — raíz con título `Contados — ¿en qué va su
   ayuda?`; `/whatsapp` con encabezado `¿En qué va su ayuda?`; `/tablero` con
   título `Contados — dónde se detiene la gente`; los tres destinos están en el
-  Markdown y `git diff --check` terminó con exit 0.
+  Markdown y `git diff --check` terminó con exit 0. Commit `8d7057f` publicado
+  en `origin/main` (`9d8fbbd..8d7057f`).
 - Decisions: conservar los cuatro pasos de la demostración y cambiar sólo sus
   puntos de entrada, para que el jurado pueda probar el mismo flujo sin preparar
   un entorno local.
 - Safety: cero cambios en código, configuración, secretos o despliegue; las
   carpetas locales `Video-demo/` y `Video-final/` permanecen fuera del alcance.
-- Remaining/blocker: gate documental, commit y push.
-- Next action: ejecutar el gate, crear el commit y publicar en `origin/main`.
+- Remaining/blocker: ninguno para esta entrega.
+- Next action: ninguno; actualizar los enlaces sólo si cambia el despliegue.
 - Owner: Codex.
 
 ## CURRENT · publicación del video entregable
