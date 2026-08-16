@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     if (!barrio || mensaje.length < 10 || mensaje.length > 1000) {
       return Response.json({ error: 'Barrio o mensaje inválido.' }, { status: 400 });
     }
-    const destinatarios = conversador.notificarBarrio(barrio, mensaje);
+    const destinatarios = await conversador.notificarBarrio(barrio, mensaje);
     let enviados = 0;
     if (enviarReal) {
       const autorizado =

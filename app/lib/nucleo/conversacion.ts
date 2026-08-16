@@ -1,3 +1,4 @@
+import { almacenPorDefecto, type AlmacenSesiones } from './almacen-sesiones';
 import type { Clasificador } from './clasificar';
 import { clasificar as clasificarReal } from './clasificar';
 import { COMPUERTA_EXPLICACION, COMPUERTA_LABEL, RIESGO_LABEL, type Diagnostico } from './schema';
@@ -91,21 +92,19 @@ function mensajeDiagnostico(dx: Diagnostico, municipio: string): string[] {
 export function crearConversador(
   clasificador: Clasificador = clasificarReal,
   ahora: () => number = Date.now,
+  almacen: AlmacenSesiones = almacenPorDefecto(),
 ) {
-  const sesiones = new Map<string, Sesion>();
   const colas = new Map<string, Promise<void>>();
 
-  function limpiarExpiradas() {
-    const limite = ahora() - TTL_MS;
-    for (const [id, sesion] of sesiones) {
-      if (sesion.actualizadoEn < limite) sesiones.delete(id);
-    }
-  }
-
   async function conversarInterno(entrada: EntradaConversacion): Promise<SalidaConversacion> {
-    limpiarExpiradas();
     const texto = entrada.texto.trim();
-    let sesion = sesiones.get(entrada.sesionId);
+    const guardada = await almacen.leer(entrada.sesionId);
+    // Una sesión más vieja que el TTL se descarta aquí. En Redis la expiración
+    // ya la aplica el propio almacén; esto cubre el caso en memoria.
+    let sesion =
+      guardada && guardada.actualizadoEn >= ahora() - TTL_MS
+        ? (guardada as Sesion)
+        : undefined;
     const mensajes: string[] = [];
 
     if (!sesion) {
@@ -120,10 +119,12 @@ export function crearConversador(
         destinatarioTemporal: entrada.destinatarioTemporal,
         pendientes: [],
       };
-      sesiones.set(entrada.sesionId, sesion);
       mensajes.push(SALUDO);
       sesion.estado = 'ESCUCHANDO';
-      if (!texto || esSoloSaludo(texto)) return { estado: sesion.estado, mensajes };
+      if (!texto || esSoloSaludo(texto)) {
+        await almacen.escribir(entrada.sesionId, sesion, TTL_MS);
+        return { estado: sesion.estado, mensajes };
+      }
     }
 
     sesion.actualizadoEn = ahora();
@@ -132,7 +133,16 @@ export function crearConversador(
     sesion.destinatarioTemporal = entrada.destinatarioTemporal ?? sesion.destinatarioTemporal;
     mensajes.push(...sesion.pendientes.splice(0));
 
-    if (!texto) return { estado: sesion.estado, mensajes };
+    // Toda salida persiste la sesión antes de responder. Si no se guardara, el
+    // siguiente mensaje podría caer en otra instancia y empezar de cero.
+    const guardar = async () => {
+      await almacen.escribir(entrada.sesionId, sesion!, TTL_MS);
+    };
+
+    if (!texto) {
+      await guardar();
+      return { estado: sesion.estado, mensajes };
+    }
     if (sesion.estado === 'SEGUIMIENTO') {
       sesion.relato = '';
       sesion.rondas = 0;
@@ -144,6 +154,7 @@ export function crearConversador(
       mensajes.push(
         'Con lo que me contó no puedo ubicarlo con seguridad. Confirme su caso con la Unidad de Gestión del Riesgo de su alcaldía. No voy a inventar un paso.',
       );
+      await guardar();
       return { estado: sesion.estado, mensajes };
     }
 
@@ -159,11 +170,13 @@ export function crearConversador(
       sesion.rondas += 1;
       sesion.estado = 'PREGUNTANDO';
       mensajes.push(pregunta);
+      await guardar();
       return { estado: sesion.estado, mensajes, diagnostico };
     }
 
     sesion.estado = 'SEGUIMIENTO';
     mensajes.push(...mensajeDiagnostico(diagnostico, sesion.municipio));
+    await guardar();
     return { estado: sesion.estado, mensajes, diagnostico };
   }
 
@@ -177,11 +190,12 @@ export function crearConversador(
     });
   }
 
-  function notificarBarrio(barrio: string, mensaje: string) {
+  async function notificarBarrio(barrio: string, mensaje: string) {
     const destinatarios: { sesionId: string; destinatarioTemporal?: string }[] = [];
-    for (const [sesionId, sesion] of sesiones) {
-      if (sesion.estado === 'SEGUIMIENTO' && sesion.barrio.toLowerCase() === barrio.trim().toLowerCase()) {
+    for (const { id: sesionId, sesion } of await almacen.porBarrio(barrio)) {
+      if (sesion.estado === 'SEGUIMIENTO') {
         sesion.pendientes.push(mensaje);
+        await almacen.escribir(sesionId, sesion, TTL_MS);
         destinatarios.push({ sesionId, destinatarioTemporal: sesion.destinatarioTemporal });
       }
     }

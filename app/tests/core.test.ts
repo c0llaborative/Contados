@@ -4,6 +4,7 @@ import { crearAgrupador, debounceWhatsAppMs } from '../lib/canales/whatsapp/agru
 import { extraerMensajes } from '../lib/canales/whatsapp/entrante';
 import { idSeguroDeTelefono } from '../lib/canales/whatsapp/identidad';
 import { MAX_AUDIO_BYTES, transcribirAudio } from '../lib/canales/whatsapp/transcribir';
+import { almacenEnMemoria } from '../lib/nucleo/almacen-sesiones';
 import { crearConversador, ErrorLimiteConversacion } from '../lib/nucleo/conversacion';
 import { asegurarInvariantes } from '../lib/nucleo/clasificar';
 import { crearMensajeEnlacePeticion } from '../lib/nucleo/enlace-peticion';
@@ -77,6 +78,52 @@ test('saluda sin mandar hola al clasificador', async () => {
   assert.equal(llamadas, 0);
   assert.match(salida.mensajes[0], /no lo registra/i);
   assert.match(salida.mensajes[0], /cédula, datos bancarios ni huella/i);
+});
+
+test('la conversación sobrevive a un cambio de instancia', async () => {
+  // Reproduce el fallo observado en WhatsApp real el 2026-08-16: cada mensaje
+  // caía en una instancia distinta de Vercel, la sesión vivía sólo en la
+  // memoria del proceso y Contados volvía a saludar como si no conociera a la
+  // persona. Dos conversadores que comparten almacén representan esas dos
+  // instancias; la segunda debe continuar la conversación, no reiniciarla.
+  const almacen = almacenEnMemoria();
+  const id = 'sim_instancias12345678';
+  const clasificador = async () => base;
+
+  const instanciaA = crearConversador(clasificador, Date.now, almacen);
+  const primera = await instanciaA.conversar({ sesionId: id, texto: 'hola' });
+  assert.match(primera.mensajes[0], /no lo registra/i);
+
+  const instanciaB = crearConversador(clasificador, Date.now, almacen);
+  const segunda = await instanciaB.conversar({ sesionId: id, texto: 'Se me agrietó la casa' });
+
+  assert.ok(
+    !segunda.mensajes.some((m) => /Soy Contados\./.test(m)),
+    'no debe volver a saludar: la sesión ya existía',
+  );
+  assert.equal(segunda.estado, 'PREGUNTANDO');
+});
+
+test('el aviso por barrio encuentra sesiones de otra instancia', async () => {
+  const almacen = almacenEnMemoria();
+  const id = 'sim_barriocompartido1';
+  const clasificador = async () => ({ ...base, compuerta: 'censo' as const, razon: 'x' });
+
+  const instanciaA = crearConversador(clasificador, Date.now, almacen);
+  await instanciaA.conversar({
+    sesionId: id,
+    texto: 'Vino una señora y anotó en un cuaderno',
+    municipio: 'Manizales',
+    barrio: 'San José',
+  });
+
+  const instanciaB = crearConversador(clasificador, Date.now, almacen);
+  const destinatarios = await instanciaB.notificarBarrio('San José', 'La visita llegó al barrio.');
+  assert.equal(destinatarios.length, 1);
+
+  const instanciaC = crearConversador(clasificador, Date.now, almacen);
+  const avisos = await instanciaC.conversar({ sesionId: id, texto: '' });
+  assert.ok(avisos.mensajes.some((m) => /La visita llegó al barrio/.test(m)));
 });
 
 test('se abstiene tres veces y luego se rinde sin inventar', async () => {
