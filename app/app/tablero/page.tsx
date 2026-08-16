@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { COMPUERTAS, COMPUERTA_LABEL, RIESGO_LABEL } from '@/lib/schema';
 import { generarCasos } from '@/lib/fixtures';
 import { MANIZALES } from '@/lib/rutas';
+import { Notificador } from '@/components/Notificador';
 
 export const metadata = {
   title: 'Contados — dónde se está trabando la gente',
@@ -207,6 +208,8 @@ export default function Tablero() {
           })}
         </ul>
       </section>
+
+      <Notificador barrios={barrios.map((item) => item.barrio)} />
 
       <footer
         className="mt-16 border-t pt-5 text-[0.875rem] leading-relaxed"

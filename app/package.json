@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "tsc -p tsconfig.tests.json && node --test .test-dist/tests/core.test.js",
+    "eval:model": "node scripts/evaluar-clasificador.mjs",
+    "setup:whatsapp-secrets": "node scripts/configurar-secretos-whatsapp.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",

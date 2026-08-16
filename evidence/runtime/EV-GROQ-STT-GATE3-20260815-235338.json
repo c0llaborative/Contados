@@ -1,0 +1,53 @@
+{
+  "evidence_id": "EV-032",
+  "timestamp": "2026-08-15T23:53:38-05:00",
+  "observer": "Codex; ZDR status reported by hackathon team",
+  "scope": "Gate 3 synthetic Spanish audio; local adapter, Groq STT and Anthropic diagnosis",
+  "privacy": {
+    "zdr": "user-observed enabled",
+    "input": "fully synthetic",
+    "real_personal_data": false,
+    "secrets_recorded": false,
+    "meta_calls": 0
+  },
+  "implementation_verification": {
+    "tests": "19/19 pass",
+    "typescript": "pass",
+    "next_build": "pass",
+    "audio_runtime": "Blob/FormData in memory; 10 MB limit",
+    "temporary_audio_deleted_after_test": true
+  },
+  "final_audio": {
+    "generator": "Microsoft Helena Desktop - Spanish",
+    "format": "WAV",
+    "bytes": 494498,
+    "sha256": "57E6D2E44B57F9594B4D66DD9466ECF581F6F123031B8E59640DB94D06CB4DF3",
+    "text": "La casa se agrietó toda. Vino una señora con un chaleco y anotó en un cuaderno, pero nadie más volvió. Yo pago arriendo."
+  },
+  "groq": {
+    "model": "whisper-large-v3-turbo",
+    "duration_ms": 1456,
+    "transcript": "La casa se agrietó toda. Vino una señora con un chaleco y anotó en un cuaderno, pero nadie más volvió. Yo pago arriendo.",
+    "result": "pass"
+  },
+  "diagnosis": {
+    "provider": "Anthropic",
+    "compuerta": "censo",
+    "alertas": ["arrendatario"],
+    "posible_estafa": false,
+    "hechos_count": 4,
+    "result": "pass"
+  },
+  "retry_history": {
+    "first_voice": "Microsoft Zira Desktop - English",
+    "groq_duration_ms": 1976,
+    "result": "partial; phonetic errors preserved censo but lost arrendatario alert",
+    "recovery": "one controlled retry with installed Spanish voice"
+  },
+  "external_calls": {
+    "groq_transcriptions": 2,
+    "anthropic_diagnoses": 2,
+    "meta": 0
+  },
+  "interpretation": "Passes Gate 3 for a synthetic Spanish WAV and a single local process. It does not prove Meta media download, human voice accuracy, account-internal ZDR state, production availability or behavior with real people."
+}

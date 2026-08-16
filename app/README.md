@@ -16,20 +16,37 @@ si está en riesgo de quedar excluida y por qué, y le genera el único instrume
 que sí tiene reloj legal. En agregado y anonimizado, produce la cifra que hoy no
 existe: cuánta gente está detenida en cada paso.
 
+**El canal principal del damnificado es WhatsApp** (código `CURRENT LOCAL`,
+conexión Meta pendiente). Ver
+[`../docs/WHATSAPP.md`](../docs/WHATSAPP.md) y el
+[ADR 0006](../docs/adr/0006-whatsapp-primero.md). Esta app es la superficie web:
+`/` para el damnificado, `/tablero` para el coordinador municipal, y `/whatsapp`
+(`CURRENT`) para la conversación.
+
 ## Correr
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...   # obligatorio: sin esto /api/diagnose falla
 npm install
+npm test
 npm run dev
 ```
 
 Abre <http://localhost:3000>. El tablero está en `/tablero`.
 
+Las variables del canal de WhatsApp están en
+[`../docs/WHATSAPP.md`](../docs/WHATSAPP.md).
+Los cuatro secretos locales se crean una sola vez con
+`npm run setup:whatsapp-secrets`; el comando cancela si alguno ya tiene valor y
+nunca imprime los valores.
+
 ## Qué hace la IA
 
-`claude-opus-5` con **structured outputs y schema estricto**
-(`additionalProperties: false`, ver `lib/schema.ts`):
+**`claude-sonnet-5`** (`CURRENT LOCAL`; aprobado 15/15 automático y manual en
+los cinco casos sintéticos del MVP, evidencia EV-030) con
+**structured outputs y schema estricto**
+(`additionalProperties: false`, ver `lib/nucleo/schema.ts`). También se puede
+comparar `gpt-4o-mini`; ver [ADR 0007](../docs/adr/0007-modelos-mvp.md):
 
 1. **Relato caótico → estado del caso.** «Vino una señora con chaleco y anotó en
    un cuaderno» = intento de censo, no registro en RUD.
@@ -40,8 +57,11 @@ Abre <http://localhost:3000>. El tablero está en `/tablero`.
 4. **Detección de suplantación**, porque hay denuncias verificadas de personas
    haciéndose pasar por funcionarios.
 
-La voz se transcribe **en el navegador** (Web Speech API, `es-CO`): el audio no
-sale del dispositivo. El campo de texto siempre está disponible.
+**En esta app web** la voz se transcribe en el navegador (Web Speech API,
+`es-CO`) y el audio no sale del dispositivo. El campo de texto siempre está
+disponible. **Esa promesa no aplica al canal de WhatsApp**, donde el audio pasa
+por Meta y por el proveedor de transcripción — ver
+[`../docs/SEGURIDAD.md`](../docs/SEGURIDAD.md) regla 12.
 
 ## Lo que este producto NO hace
 
@@ -68,12 +88,13 @@ convierte una espera indefinida en una obligación con fecha.
 ## Estructura
 
 ```
-lib/schema.ts     Modelo Case de 5 compuertas + JSON Schema del clasificador
-lib/corpus.ts     Corpus normativo congelado con SHA-256; días hábiles en código
-lib/rutas.ts      Ruta verificada de Manizales
+lib/nucleo/       Schema, clasificador, conversación, petición, corpus y rutas
+lib/canales/      Adaptadores de Meta, firma, envío y transcripción
 lib/fixtures.ts   54 casos sintéticos deterministas para el tablero
 app/api/diagnose  Relato → compuerta + riesgos (structured outputs)
-app/api/peticion  Derecho de petición con citas del corpus y su hash
+app/api/peticion  POST web y GET temporal cifrado del derecho de petición
+app/api/whatsapp  Verificación y webhook firmado de Meta
+app/whatsapp      Simulador con el mismo handler de conversación
 app/tablero       Agregado por compuerta y por barrio
 ```
 
@@ -84,7 +105,9 @@ colombianas.
 
 ## Pendiente
 
-- Probar contra el modelo (los tres casos + la prueba de abstención).
+- Revisar visualmente `/whatsapp` y `/tablero` en 412×915.
+- Conectar y probar Meta. Groq STT pasó con audio sintético y ZDR reportado;
+  todavía no prueba voces humanas ni el transporte de audio desde Meta.
 - Grabar los tres audios sintéticos.
 - Prueba de falsa expectativa: que alguien ajeno recorra el flujo y luego se le
   pregunte «¿usted quedó registrado ante la alcaldía?». Si duda, el copy está

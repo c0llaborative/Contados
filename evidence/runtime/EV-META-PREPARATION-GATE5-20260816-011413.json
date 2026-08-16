@@ -1,0 +1,42 @@
+{
+  "evidence_id": "EV-034",
+  "timestamp": "2026-08-16T01:14:13-05:00",
+  "observer": "Codex; account/UI facts reported by hackathon team",
+  "scope": "Gate 5 Meta Developer preparation and local credential isolation",
+  "result": "pass with recorded risk",
+  "correction": {
+    "corrected_at": "2026-08-16T09:00:00-05:00",
+    "field": "user_observed.two_factor_authentication",
+    "was": true,
+    "now": false,
+    "reason": "The original record assumed 2FA was active because the runbook listed it as step 1 of Gate 5. On 2026-08-16 the team reported explicitly that no 2FA is enabled on the administrator account. A false positive on a security control is not preserved by the seal-the-artifact convention, so the value is corrected in place and the correction is disclosed here rather than silently overwritten."
+  },
+  "user_observed": {
+    "two_factor_authentication": false,
+    "phone_number_id_label_confirmed": true,
+    "app_secret_saved": true,
+    "token_expiration_displayed": false,
+    "recipient_limit_displayed": false
+  },
+  "machine_verified_without_values": {
+    "graph_version_format": true,
+    "access_token_present": true,
+    "phone_number_id_numeric": true,
+    "app_secret_present": true,
+    "meta_values_unique": true,
+    "secret_values_scanned": 10,
+    "secret_leak_files": 0,
+    "env_git_ignored": true,
+    "env_git_tracked": false,
+    "whatsapp_send_enabled": false
+  },
+  "regression": {
+    "tests": "19/19 pass",
+    "typescript": "pass",
+    "next_build": "pass",
+    "routes": 10,
+    "external_calls": 0
+  },
+  "interpretation": "Proves local Meta variables are present and isolated and records the team's UI observations. It does not validate the credentials against Meta, prove token lifetime or recipient limits, deploy the app, verify a webhook, send a message or authorize production use.",
+  "open_risk": "The administrator account has no 2FA, so the App Secret and access token rest on a single password. This is bounded by scope — test number, sends disabled, credentials local only — not mitigated by a control. Enabling 2FA is required before any non-synthetic use. Token expiration and recipient limit were never displayed, so both remain unknown; an authentication failure at Gate 7 or 8 should be treated first as an expired token and recovered by regenerating only WHATSAPP_TOKEN."
+}

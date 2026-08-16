@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": ".test-dist",
+    "rootDir": "."
+  },
+  "include": [
+    "tests/core.test.ts",
+    "lib/nucleo/**/*.ts",
+    "lib/canales/whatsapp/entrante.ts",
+    "lib/canales/whatsapp/identidad.ts",
+    "lib/canales/whatsapp/agrupar.ts",
+    "lib/canales/whatsapp/transcribir.ts"
+  ]
+}

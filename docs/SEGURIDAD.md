@@ -1,17 +1,24 @@
 # Límites de seguridad — Contados
 
-Estado: `CURRENT · INNEGOCIABLE`
+Estado: `CURRENT · INNEGOCIABLE` · reglas 12 a 14 implementadas localmente;
+prueba externa pendiente
 
 Cada regla de aquí existe por un error ajeno documentado. Romper cualquiera
 hunde el proyecto, y varias lo hundirían con razón.
 
-Estos límites son lo único que sobrevivió del blueprint de Ruta Clara. Se
-conservan porque son el mejor trabajo que quedó de aquella etapa.
+Las reglas 1 a 11 son lo único que sobrevivió del blueprint de Ruta Clara. Se
+conservan porque son el mejor trabajo que quedó de aquella etapa. Las reglas 12 a
+14 son nuevas: **las obliga el canal de WhatsApp**. Están implementadas
+localmente; falta comprobar Meta y Groq en cuentas reales.
+
+**Las reglas aplican a las tres superficies** (WhatsApp, web damnificado,
+tablero). Por eso el núcleo compartido de `app/lib/nucleo/` no es solo comodidad:
+es lo que impide que una regla se cumpla en un canal y no en el otro.
 
 ## 1. No registramos a nadie
 
-**En la pantalla 1, permanente y grande: «Esto no lo registra ante ninguna
-entidad.»**
+**En la pantalla 1 y en el primer mensaje de WhatsApp, permanente y grande:
+«Esto no lo registra ante ninguna entidad.»**
 
 Solo el Consejo Municipal de Gestión del Riesgo puede inscribir en el RUD. Esta
 es la falla que mató la idea anterior (censo ciudadano por voz) y la peor forma
@@ -32,7 +39,10 @@ pedir exactamente eso puerta a puerta; la Alcaldía de Cali tuvo que desmentirlo
 públicamente. Un producto no oficial que pida esos datos es indistinguible de la
 estafa.
 
-Aviso fijo: *«Registrarse en el censo es gratis. Nadie puede cobrarle.»*
+Aviso fijo: *«Registrarse en el censo es gratis. Nadie puede cobrarle.»* En
+WhatsApp va en el **primer** mensaje, antes de que la persona cuente nada: si un
+canal desconocido le escribe, lo primero que debe leer es que no le vamos a pedir
+esos datos.
 
 El producto además **marca** el relato como posible suplantación cuando quien
 tomó los datos pudo no ser funcionario.
@@ -52,9 +62,14 @@ correcta y esperada.**
 Inventar una compuerta es el peor error posible, porque la persona actuará sobre
 ella: irá al lugar equivocado, o dejará de ir al correcto.
 
-Invariante en código (`app/app/api/diagnose/route.ts`): si el modelo se abstiene
-sin explicar qué falta, el servidor rellena la pregunta. Nunca devuelve una
-abstención muda.
+Invariante en código (`app/lib/nucleo/clasificar.ts`): si el modelo se abstiene sin explicar qué
+falta, el servidor rellena la pregunta. Nunca devuelve una abstención muda.
+
+**En WhatsApp la abstención se vuelve conversación, con tope.** El sistema
+pregunta lo que falta y reclasifica, **máximo tres rondas**. Al agotarlas dice
+que no puede ubicarlo con seguridad y entrega la ruta genérica del municipio. Un
+sistema que pregunta indefinidamente es tan inútil como uno que inventa, y en un
+canal de mensajería se siente como un interrogatorio.
 
 ## 5. Cada hecho lleva su evidencia textual
 
@@ -110,11 +125,92 @@ excluidas en el `.gitignore` de la raíz.
 El copy dice qué quedó registrado y qué sigue. Nunca que el subsidio llegará,
 ni cuándo.
 
+## 12. La promesa del audio solo vale en la web — y lo decimos
+
+Estado: `CURRENT LOCAL · STT REAL PENDIENTE`
+
+En la web, la voz se transcribe **en el navegador** con Web Speech API: el audio
+nunca sale del dispositivo. Eso es cierto y lo hemos afirmado.
+
+**En WhatsApp no es cierto.** La nota de voz pasa por los servidores de Meta y
+por el proveedor de transcripción. Decir lo contrario sería mentir, y un jurado
+que note la contradicción hace más daño que la limitación misma.
+
+Reglas concretas:
+
+- La promesa se enuncia **acotada**: «en la web, el audio no sale de su
+  dispositivo». Nunca sin el «en la web».
+- El audio se **borra apenas se transcribe**. No se guarda ni se reenvía.
+- **No se usa ningún tier gratuito que entrene con los datos.** Son relatos de
+  damnificados. Verificar la política del proveedor **antes de grabar**; si no
+  cumple, se cae a un proveedor pagado.
+- Si no da tiempo de documentar esto bien, **se cortan las notas de voz.** Es el
+  primer candidato a corte de [`PLAN.md`](PLAN.md) precisamente por esto.
+
+## 13. El número de teléfono es dato personal
+
+Estado: `CURRENT LOCAL`
+
+En la práctica un celular identifica a una persona más que su cédula: es
+directamente contactable. La regla 2 dice que no pedimos cédula; sería incoherente
+tratar el número con menos cuidado.
+
+- La llave de sesión es `SHA-256(número + SESION_SAL)`. Nunca se usa el
+  número crudo como identificador.
+- El número crudo no se escribe en logs, ni en fixtures, ni en el repositorio.
+- Para poder responder y notificar, el destinatario crudo vive sólo en memoria
+  dentro de la sesión efímera; muere con el TTL o el proceso.
+- La sal va en variable de entorno, no en el código.
+- El enlace al derecho de petición lleva un token autocontenido cifrado y
+  autenticado con AES-256-GCM, no un consecutivo ni datos legibles.
+
+**Condición de parada:** cualquier número de teléfono real en el repositorio
+bloquea la publicación.
+
+## 14. El estado de conversación es efímero, y eso es la postura
+
+Estado: `CURRENT LOCAL`
+
+El estado vive en memoria con TTL y muere con el proceso. Es una limitación
+técnica real —está documentada en [`WHATSAPP.md`](WHATSAPP.md)— pero también es
+la postura de retención: **no acumulamos historias de damnificados.**
+
+Se dice como es: no hay base de datos, no hay respaldo, no hay histórico. Lo que
+persiste es el agregado anonimizado del tablero, que ya está rotulado como
+autorreportado por la regla 9.
+
+## 15. El enlace temporal es una credencial de acceso
+
+Estado: `CURRENT LOCAL`
+
+El enlace de petición funciona como una credencial *bearer*: cualquier persona
+que lo reciba puede abrir el borrador durante 15 minutos. Por eso:
+
+- el contenido viaja cifrado y autenticado; una alteración responde 404;
+- al vencer responde 410 y orienta a generar otro desde `/whatsapp`;
+- la respuesta usa `no-store`, `no-referrer` y `noindex`;
+- `PETICION_LINK_SECRET` es independiente de las demás claves; rotarlo invalida
+  todos los enlaces emitidos;
+- no se guardan tokens en logs, capturas ni evidencia;
+- la persona no debe reenviar ni capturar el enlace mientras esté vigente.
+
+Si falta el secreto, el diagnóstico sigue funcionando pero no se ofrece un
+enlace. La ruta POST web se conserva como recuperación. Esto no radica el
+documento ante ninguna entidad.
+
 ## Barrido antes de entregar
 
 ```bash
+# Lenguaje prohibido
 grep -rniE "es segura|es habitable|cumple norma|garantiza|queda registrado ante" app/app app/components app/lib
 ```
 
 Cero coincidencias, salvo las prohibiciones mismas dentro del prompt del
 sistema. Ejecutado el 2026-08-15: pasa.
+
+```bash
+# CURRENT — números de teléfono crudos (regla 13)
+grep -rnE "\+?57[ -]?3[0-9]{9}|\b3[0-9]{9}\b" app/ docs/ --exclude-dir=node_modules
+```
+
+Debe dar cero. Pendiente de ejecutar cuando exista el canal.

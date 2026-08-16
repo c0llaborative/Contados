@@ -1,92 +1,82 @@
 # Guion del video — Contados
 
-Estado: `CURRENT` · Objetivo: **50-55 segundos** (máximo permitido: 60)
+Estado: `CURRENT · LISTO PARA GRABAR CON EL SIMULADOR` · duración objetivo:
+55 segundos; máximo 60.
 
-No hay pitch en vivo. El video **es** el producto ante el jurado.
+El video se graba primero en `/whatsapp`. Si después Meta pasa EXT-META-001,
+puede repetirse en el teléfono. Si no pasa, se conserva el simulador y nunca se
+afirma que WhatsApp real está conectado.
 
-## Reglas
+## Preparación
 
-- Valor antes del segundo 12.
-- Se ve una persona hablando, no un gráfico.
-- Sin música épica, sin voz de locutor, sin logos animados.
-- Todo lo que aparece en pantalla es sintético. Ningún dato real.
-- Grabar con red estable. Si la latencia arruina la toma, usar respuesta
-  prevalidada **marcada como tal**.
+1. Usar sólo el relato sintético del Caso 1 de `PRUEBAS.md`.
+2. Ejecutar `npm test`, `npx tsc --noEmit` y `npm run build`.
+3. Confirmar P0 real del modelo elegido; si no está confirmado, la salida en el
+   video debe rotularse **respuesta prevalidada para demo**.
+4. Abrir `/whatsapp` y `/tablero` en ventanas limpias, sin consola, credenciales,
+   nombres, teléfonos ni notificaciones personales.
+5. Grabar a 1080p, cursor grande y zoom suficiente para leer en celular.
 
-## Escaleta
+## Escaleta exacta
 
-### 0-10 s · La cita
+### 0–08 s · El problema
 
-Pantalla negra. Texto que entra solo:
+Negro, texto y voz humana:
 
-> «Todavía no nos han dicho nada, **solo nos tienen contados** y estamos
-> esperando que nos den la ayuda.»
+> «Todavía no nos han dicho nada, solo nos tienen contados.»
+
+Luego: **Reporte → Censo → Visita técnica → RUD → Subsidio. Nadie le dice
+a una familia en cuál paso está trabada.**
+
+### 08–20 s · La conversación segura
+
+Mostrar `/whatsapp`; escribir «hola». Dejar visible el primer mensaje:
+«Esto no lo registra ante ninguna entidad» y «nunca pediremos cédula, datos
+bancarios ni huella».
+
+Pegar el relato sintético:
+
+> La casa se agrietó toda, vino una señora con un chaleco y anotó en un
+> cuaderno, pero nadie más volvió. Yo pago arriendo.
+
+### 20–34 s · Diagnóstico y exclusión
+
+Mostrar, sin acelerar la lectura:
+
+- **Paso: censo.** Anotar en un cuaderno no significa estar en el RUD.
+- **Riesgo: arrendataria.** Acción concreta para no quedar por fuera.
+
+Voz: «Cuando el relato no alcanza, Contados pregunta hasta tres veces y luego
+se abstiene. Nunca inventa un paso.»
+
+### 34–44 s · El único reloj
+
+Corte breve al derecho de petición ya generado. Enfatizar:
+
+> La ley no fija plazo para censar. Una petición sí debe responderse en 15 días
+hábiles. Contados genera el borrador; no lo radica.
+
+### 44–53 s · El coordinador notifica
+
+En `/tablero`, seleccionar el mismo barrio y pulsar **Notificar en la demo**.
+Volver al simulador y pulsar **Revisar avisos del barrio**. Mostrar el aviso.
+
+Voz: «La familia no vuelve a consultar: el municipio le avisa cuando la
+atención llega a su barrio.»
+
+### 53–58 s · Cierre
+
+Negro:
+
+> **Contados. No otra fila: una forma de saber dónde está trabada.**
 >
-> Felipe Varela, damnificado · 2026
+> Prototipo con datos 100% sintéticos · no es un canal oficial.
 
-Debajo, más pequeño:
+## Reglas de corte y evidencia
 
-> Más de 100.000 personas siguen esperando.
-
-### 10-25 s · El relato
-
-Mano sosteniendo un celular. Se oye el audio real, desordenado:
-
-> «La casa se agrietó toda, vino una señora con un chaleco y anotó en un
-> cuaderno, pero nadie más volvió. Yo pago arriendo.»
-
-La fila de cinco compuertas se enciende de arriba abajo. Se detiene en la **2**,
-con el marcador ámbar y el rótulo **USTED ESTÁ AQUÍ**.
-
-Texto en pantalla: *Reportar no es estar censado. Censado no es estar en el RUD.*
-
-### 25-38 s · La alerta
-
-Aparece la alerta roja:
-
-> **Usted paga arriendo.** Varios apoyos piden acreditar propiedad — esto es lo
-> que debe pedir para no quedar por fuera.
-
-Una línea de texto abajo:
-
-> En México 2017, el censo inicial dejó por fuera 22.000 viviendas con daño
-> severo. Casi siempre quedan por fuera los mismos.
-
-### 38-48 s · El plazo
-
-Un toque en «Ponerle plazo al Estado». Sale el oficio, con la cita y el hash
-visibles.
-
-Texto grande sobre el documento:
-
-> **El Estado no tiene plazo para censarte.**
-> **Tú sí puedes ponerle uno.**
-> 15 días hábiles · Ley 1755 de 2015
-
-### 48-55 s · El agregado
-
-Corte al tablero. La barra de «Evaluación técnica» dominando.
-
-> El 43% de los hogares está detenido en el mismo paso.
-
-Cierre, texto sobre negro:
-
-> **La ayuda ya existe. El problema es que nadie sabe en qué va.**
->
-> Contados
-
-## Lo que NO puede aparecer
-
-- Las capturas del canal del evento (`archivo/canal-interno/`): tienen nombre y
-  foto de una persona real.
-- Cualquier cédula, dirección o nombre real.
-- La palabra «registrado» sin la aclaración de que no registramos ante nadie.
-- Cualquier afirmación de que una vivienda es segura o habitable.
-- Promesas de que el subsidio llegará.
-
-## Producción
-
-1. Grabar 2-3 tomas completas. No editar sobre la primera.
-2. Cronometrar cada toma. Si pasa de 55 s, recortar de la escena 3, no de la 1.
-3. Verificar reproducción completa antes de subir.
-4. No guardar la única copia en el teléfono con que se grabó.
+- Cortar primero audio de WhatsApp, luego Meta real; nunca cortar diagnóstico,
+  abstención, notificación o aviso de no registro.
+- Si el montaje dura más de 60 s, quitar explicación del tablero, no acelerar
+  texto ilegible.
+- Conservar archivo fuente, export final, duración exacta y SHA-256 en el registro
+  de evidencia. No publicar hasta la prueba de falsa expectativa.
