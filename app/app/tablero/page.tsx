@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import { COMPUERTAS, COMPUERTA_LABEL, RIESGO_LABEL } from '@/lib/schema';
+import { COMPUERTAS, COMPUERTA_LABEL, RIESGO_LABEL_AGREGADO } from '@/lib/schema';
 import { generarCasos } from '@/lib/fixtures';
 import { MANIZALES } from '@/lib/rutas';
 import { Notificador } from '@/components/Notificador';
 
 export const metadata = {
-  title: 'Contados — dónde se está trabando la gente',
+  title: 'Contados — dónde se detiene la gente',
 };
 
 export default function Tablero() {
@@ -38,7 +38,7 @@ export default function Tablero() {
         <p className="folio">Contados · Tablero de {MANIZALES.municipio}</p>
         <div className="rule-double my-3" />
         <h1 className="display text-[2.4rem] leading-[1.08]">
-          Dónde se está<br />trabando la gente
+          Dónde se<br />detiene la gente
         </h1>
         <p
           className="mt-4 text-[1.0625rem] leading-relaxed"
@@ -153,16 +153,16 @@ export default function Tablero() {
           A dónde mandar los ingenieros primero.
         </p>
         <p className="mb-5 text-[1rem]" style={{ color: 'var(--ink-soft)' }}>
-          Barrios ordenados por cuántos hogares llevan más tiempo esperando la visita
-          técnica. No reemplaza el criterio de la Unidad de Gestión del Riesgo: le
-          agrega el dato que hoy le falta.
+          Barrios ordenados por cuántos hogares están esperando la visita técnica. No
+          reemplaza el criterio de la Unidad de Gestión del Riesgo: le agrega el dato
+          que hoy le falta.
         </p>
         <table className="w-full text-[1.0625rem]">
           <thead>
             <tr style={{ borderBottom: '2px solid var(--ink)' }}>
               <th className="folio pb-2 text-left">Barrio</th>
               <th className="folio pb-2 text-right">Esperando visita</th>
-              <th className="folio pb-2 text-right">Casos</th>
+              <th className="folio pb-2 text-right">Hogares</th>
             </tr>
           </thead>
           <tbody>
@@ -207,7 +207,7 @@ export default function Tablero() {
         </p>
         <ul className="mt-5 space-y-2">
           {(
-            Object.keys(RIESGO_LABEL) as (keyof typeof RIESGO_LABEL)[]
+            Object.keys(RIESGO_LABEL_AGREGADO) as (keyof typeof RIESGO_LABEL_AGREGADO)[]
           ).map((r) => {
             const n = casos.filter((c) => c.riesgos.includes(r)).length;
             if (n === 0) return null;
@@ -217,7 +217,7 @@ export default function Tablero() {
                 className="flex items-baseline justify-between gap-3 border-b py-1.5 text-[1.0625rem]"
                 style={{ borderColor: 'var(--rule)' }}
               >
-                <span>{RIESGO_LABEL[r]}</span>
+                <span>{RIESGO_LABEL_AGREGADO[r]}</span>
                 <span className="font-bold tabular-nums">{n}</span>
               </li>
             );

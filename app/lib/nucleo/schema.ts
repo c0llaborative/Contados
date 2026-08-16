@@ -74,6 +74,23 @@ export const RIESGO_LABEL: Record<RiesgoExclusion, string> = {
   zona_sin_cobertura: 'Su zona todavía no ha sido visitada',
 };
 
+/**
+ * Los mismos riesgos, dichos en tercera persona.
+ *
+ * `RIESGO_LABEL` le habla a la persona («Usted paga arriendo») y así debe
+ * seguir en la conversación. En el tablero esas etiquetas encabezan una
+ * columna de conteos agregados, y ahí «Usted paga arriendo — 18» no tiene
+ * sentido: quien lee es un coordinador, no la damnificada.
+ */
+export const RIESGO_LABEL_AGREGADO: Record<RiesgoExclusion, string> = {
+  arrendatario: 'Pagan arriendo',
+  sin_titulo: 'Vivienda sin escritura a su nombre',
+  titular_ausente: 'Vivienda a nombre de otra persona',
+  sin_documentos: 'Perdieron sus documentos',
+  ausente_en_visita: 'No estaban cuando tomaron datos',
+  zona_sin_cobertura: 'Zona todavía no visitada',
+};
+
 /** Un hecho que la persona relató, con la frase textual que lo sustenta. */
 export interface Hecho {
   /** Lo que el sistema entendió, en tercera persona. */
