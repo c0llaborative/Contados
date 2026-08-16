@@ -20,6 +20,22 @@ const MAX_POR_VENTANA = 12;
 
 const llamadas: number[] = [];
 
+/**
+ * Compuerta explícita. El 2026-08-16 la cuenta de Groq empezó a rechazar los
+ * endpoints de inferencia con 401 aunque la clave sirve para listar modelos,
+ * así que la función queda apagada por defecto: más vale que el botón no
+ * exista a que falle delante del jurado. Se enciende poniendo
+ * `NOTAS_VOZ_DEMO=true` en el entorno, sin tocar código.
+ */
+function habilitado() {
+  return process.env.NOTAS_VOZ_DEMO === 'true' && Boolean(process.env.GROQ_API_KEY);
+}
+
+/** El simulador consulta esto al cargar para decidir si muestra los botones. */
+export async function GET() {
+  return Response.json({ disponible: habilitado() });
+}
+
 function excedeLimite() {
   const ahora = Date.now();
   while (llamadas.length > 0 && llamadas[0] < ahora - VENTANA_MS) llamadas.shift();
@@ -30,8 +46,8 @@ function excedeLimite() {
 
 export async function POST(req: Request) {
   try {
-    if (!process.env.GROQ_API_KEY) {
-      return Response.json({ error: 'La transcripción no está configurada.' }, { status: 503 });
+    if (!habilitado()) {
+      return Response.json({ error: 'Las notas de voz están desactivadas.' }, { status: 503 });
     }
     if (excedeLimite()) {
       return Response.json({ error: 'Demasiadas notas seguidas. Espere un momento.' }, { status: 429 });

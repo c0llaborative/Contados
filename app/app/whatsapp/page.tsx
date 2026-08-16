@@ -319,10 +319,17 @@ export default function SimuladorWhatsApp() {
   const cola = useRef<string[]>([]);
   const drenando = useRef(false);
 
-  // Descubre qué notas de la demo existen y en qué formato quedaron.
+  // Descubre qué notas de la demo existen y en qué formato quedaron. Si la
+  // transcripción está apagada no se muestra nada: un botón que falla en la
+  // grabación es peor que un botón que no está.
   useEffect(() => {
     let vigente = true;
     (async () => {
+      const estado = await fetch('/api/nota-voz')
+        .then((r) => r.json() as Promise<{ disponible?: boolean }>)
+        .catch(() => ({ disponible: false }));
+      if (!estado.disponible || !vigente) return;
+
       const encontradas: { id: string; etiqueta: string; src: string }[] = [];
       for (const nota of NOTAS_DEMO) {
         for (const ext of EXTENSIONES) {

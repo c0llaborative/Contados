@@ -227,6 +227,41 @@ paso 9 (el video).
 
 ## Historial
 
+### 2026-08-16 — Regresión de Groq: la cuenta pierde acceso de inferencia
+
+- Status: `BLOQUEADO POR PROVEEDOR · FUNCIÓN APAGADA, NO RETIRADA`.
+- Scope: el equipo pidió iniciar la demo con notas de voz reales. Se construyó
+  `/api/nota-voz`, que transcribe con la misma función `transcribirAudio` del
+  webhook de Meta y mete la transcripción en la misma conversación que el texto.
+  El equipo grabó dos notas sintéticas y las dejó en `app/public/demo/`.
+- Machine-verified 2026-08-16 02:55: la clave de Groq responde **200 en
+  `/models`** pero **401 «Invalid API Key» en `/audio/transcriptions` y en
+  `/chat/completions`**. Una clave inventada da 401 también en `/models`, así que
+  el endpoint sí valida y la credencial es genuina. El equipo generó una clave
+  nueva y el patrón se repitió idéntico.
+- Diagnosis: no es el código, ni los archivos, ni la clave. La cuenta autentica
+  para lectura y está rechazada para inferencia — el patrón típico de facturación
+  vencida, cuenta suspendida o clave sin permiso de inferencia. `x-request-id`
+  para soporte de Groq: `req_01m04s2w1je02rqc3xbqhk15w1`.
+- Regression contra EV-032: esa evidencia registró una transcripción correcta el
+  2026-08-15 23:53 con este mismo montaje. EV-032 no se edita ni se invalida:
+  probó lo que probó el día que se corrió. Lo que cambió es el estado de la
+  cuenta, y eso se registra aquí.
+- Decision: la función queda **apagada por compuerta explícita**, no retirada.
+  `NOTAS_VOZ_DEMO=false` hace que `/api/nota-voz` responda 503 y que el simulador
+  no muestre los botones. Un botón que falla delante del jurado es peor que un
+  botón que no existe. Se enciende poniendo la variable en `true`, sin tocar
+  código, si la cuenta se recupera.
+- Honestidad: el repositorio no puede afirmar que las notas de voz funcionan hoy.
+  Están construidas y probadas localmente hasta el borde del proveedor; la
+  llamada externa no pasa. Si no se resuelve antes de grabar, el video no las
+  muestra y el orden de corte del plan se cumple: audio es lo primero que cae.
+- Verified: `npm test` 19/19, `npx tsc --noEmit` exit 0, `npm run build` exit 0
+  con 11 rutas. El camino de texto con Anthropic sigue respondiendo 200 y el
+  diagnóstico completo se reprodujo en Chrome.
+- Next action: grabar el video con la demo escrita, que está verificada.
+- Owners: equipo para la cuenta de Groq; Codex para la compuerta y el registro.
+
 ### 2026-08-16 — Gate 5 cerrado con riesgo registrado; Gate 6 iniciado
 
 - Status Gate 5: `HECHO CON RIESGO REGISTRADO`. Las cuatro credenciales están
