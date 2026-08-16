@@ -2,6 +2,142 @@
 
 Todas las fechas usan America/Bogota.
 
+## 2026-08-16 — Publicación del repositorio
+
+### Added
+
+- `LICENSE`: **AGPL-3.0**, texto canónico sin modificar. Se prefirió sobre MIT y
+  Apache porque el producto se piensa ofrecer a entidades públicas y a
+  cooperación: bajo una licencia permisiva un tercero podría cerrarlo y vendérselo
+  a la misma alcaldía. La AGPL lo impide y, al ser aprobada por la OSI, mantiene
+  al proyecto elegible como bien público digital.
+- `NOTICE.md`: razón de la licencia, posibilidad de licenciamiento comercial
+  separado, y exclusión explícita del material de terceros — los PDF oficiales de
+  `archivo/evidencia-fuentes/` y el deck del evento.
+
+### Changed
+
+- README: estado actualizado, estructura con `docs/adr/` y `evidence/runtime/`, y
+  la instrucción de credencial dejó de enseñar `export ANTHROPIC_API_KEY=...`,
+  que deja el secreto en el historial del shell. Ahora apunta a `.env.local`.
+- `.gitignore` raíz: cubre `.vercel/`, `.gstack/` y `*.key`.
+
+### Verified
+
+- `npm test` 19/19, `npx tsc --noEmit` exit 0, `npm run build` exit 0 con 10
+  rutas.
+- Aislamiento de secretos previo a publicar: 9 valores sensibles de `.env.local`
+  contrastados contra 96 archivos del repositorio, **0 coincidencias**. Ningún
+  valor se imprimió. `.env.local` ignorado y no rastreado; `.env.example` sin
+  valores; `git diff --check` exit 0; 0 teléfonos y 0 identificadores tipo cédula
+  en la documentación.
+
+### Known risk
+
+- La cuenta administradora de Meta **no tiene 2FA** y la consola del equipo no
+  muestra la expiración del token temporal ni el límite de destinatarios. Se
+  registra como riesgo aceptado y acotado —número de prueba, envíos apagados—, no
+  como verificado. Activar 2FA es obligatorio antes de cualquier uso no
+  sintético.
+
+## 2026-08-15 — Núcleo compartido, simulador y adaptadores de WhatsApp
+
+### Added
+
+- `docs/IMPLEMENTACION_PASO_A_PASO.md`: runbook operativo con 12 gates,
+  responsables, resultados esperados, evidencia, stop conditions y recuperación.
+- Núcleo independiente de Next.js con clasificador Anthropic/OpenAI configurable,
+  máquina de estados y abstención limitada a tres repreguntas.
+- Simulador `/whatsapp`, webhook de Meta con verificación GET, firma HMAC del
+  POST, deduplicación, hash de sesión y envío real apagado por defecto.
+- Transcripción Groq en memoria, límite de 10 MB y cero archivos de audio.
+- Notificación por barrio desde `/tablero`; en demo queda en el simulador y el
+  envío real requiere dos compuertas de autorización.
+- Agrupación por sesión tras 12 segundos de silencio, máximo ocho mensajes,
+  deduplicación y reintento transaccional ante fallo del proveedor.
+- Generador de petición compartido y enlace cifrado AES-256-GCM de 15 minutos,
+  con recuperación segura para enlaces alterados, expirados o sin secreto.
+- Transcripción Groq separada de la descarga Meta para poder probar el mismo
+  flujo en memoria sin exponer una ruta pública de diagnóstico.
+- Script local `scripts/probar-stt.mjs` para audio sintético, sin imprimir claves.
+- Generador `setup:whatsapp-secrets` que crea cuatro secretos independientes de
+  32 bytes y cancela antes de sobrescribir valores existentes.
+- Suite local de cinco pruebas y `app/.env.example` sin secretos.
+- ADR 0007 con comparación reproducible de Sonnet 5, GPT-4o mini, Groq y Gemini.
+
+### Verified
+
+- `npm test`: 19/19 pruebas pasan, incluidas agrupación, duplicados, reintentos,
+  concurrencia, límites, cifrado, alteración, expiración y escape HTML.
+- `npx tsc --noEmit`: exit 0.
+- `npm run build`: exit 0; diez rutas, incluida `/api/peticion/[token]`.
+- Anthropic `claude-sonnet-5` con `effort: medium`: P0 final 15/15 automático y
+  manual; mediana 6445 ms. EV-030 conserva JSONL y SHA-256.
+- Quality gate documental: 17 Markdown vigentes, 0 enlaces locales rotos, 0
+  patrones de secreto en alcance, hash EV-030 coincide y `git diff --check`
+  pasa; `.env.local` no está versionado.
+- Chrome 412×915: `/whatsapp` y `/tablero` sin overflow horizontal, controles y
+  tabla dentro del viewport, saludo visible y cero errores/warnings de consola.
+- Groq `whisper-large-v3-turbo`: audio sintético español transcrito exactamente
+  en 1.456 ms; diagnóstico `censo` + `arrendatario`. EV-032.
+- Gate 4: cuatro secretos válidos y únicos, aislados en `.env.local`; 0 fugas,
+  envíos apagados, 19/19 pruebas y build limpio. EV-033.
+
+### Pending
+
+- STT y Meta no se han probado y no se presentan como verificados. El P0 sólo
+  cubre cinco relatos sintéticos; no demuestra desempeño con relatos reales.
+- Meta continúa sin prueba real; Groq no se ha probado con voz humana ni medios
+  descargados desde Meta.
+
+## 2026-08-15 — WhatsApp primero (decision y especificacion, sin codigo)
+
+### Added
+
+- `docs/adr/0006-whatsapp-primero.md`: WhatsApp como canal principal del
+  damnificado, con la web conservada completa para dos usuarios. Incluye la
+  decision de bajar el clasificador de `claude-opus-5` a `claude-sonnet-5` y la
+  eleccion de Groq `whisper-large-v3-turbo` para transcribir audio.
+- `docs/WHATSAPP.md`: arquitectura del canal (un nucleo, tres superficies),
+  maquina de estados conversacional con tope de tres rondas de repregunta, pasos
+  concretos para encender Meta Cloud API con numero de prueba, variables de
+  entorno, y las limitaciones reales del canal (ventana de servicio de 24 h,
+  token temporal, 5 destinatarios, estado en memoria).
+- `docs/SEGURIDAD.md` reglas 12, 13 y 14: la promesa del audio solo vale en la
+  web y se enuncia acotada; el numero de telefono es dato personal y se guarda
+  solo como hash con sal; el estado de conversacion es efimero y eso es la
+  postura de retencion.
+- `docs/PRUEBAS.md`: siete pruebas P0 del flujo conversacional (C1 a C7),
+  incluyendo que «hola» no puede devolver `400`, que la repregunta se rinde
+  honestamente en la ronda 4, que la estafa llega antes que el diagnostico, y que
+  la notificacion desde el tablero llega solo al barrio correcto.
+
+### Changed
+
+- Tras consultar a un jurado del evento se adopta WhatsApp como canal principal.
+  **No es un pivote**: `PRODUCTO.md` ya sostenia, citando a GOV.UK Notify, que
+  habia que notificar en vez de obligar a consultar, y sin embargo tenia
+  «notificaciones push reales» en fuera de alcance porque una web app no puede
+  notificar. Segundo hallazgo: la abstencion obligatoria es conversacional por
+  diseno y la web la estaba desperdiciando — `falta_preguntar` era una lista que
+  nadie respondia.
+- `docs/PLAN.md`: reescrito con el estado de dos canales, la tabla «Que vamos a
+  modificar» archivo por archivo, la ruta de ejecucion de 14 horas con orden de
+  corte, y cinco riesgos nuevos.
+- `docs/PRODUCTO.md`: tabla de canales, recorrido de usuario de WhatsApp, y las
+  notificaciones salen de «fuera de alcance» para pasar a implementarse.
+- `README.md`: estado, estructura objetivo y la seccion de IA con los dos
+  modelos.
+
+### Notes
+
+- **Nada de esto esta construido.** Todo lo nuevo queda marcado `PLANEADO`. Se
+  introduce la convencion explicita `CURRENT` / `PLANEADO` en README, PLAN,
+  PRODUCTO, SEGURIDAD y WHATSAPP para que ninguna afirmacion sin verificar pueda
+  leerse como hecho.
+- El bloqueador sigue siendo el mismo desde temprano: el clasificador nunca se ha
+  ejecutado contra ningun modelo.
+
 ## 2026-08-15 — Contados (construccion)
 
 ### Added

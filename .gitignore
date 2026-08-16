@@ -10,10 +10,17 @@ archivo/canal-interno/
 .env.*
 !.env.example
 *.pem
+*.key
 app/.gstack/
+.gstack/
+
+# Vercel: `.vercel/` guarda los IDs de proyecto/organizacion vinculados a la
+# cuenta. No son secretos, pero atan el repo publico a una cuenta concreta.
+.vercel/
 
 # === Dependencias y build ===
 node_modules/
+.test-dist/
 .next/
 out/
 build/
