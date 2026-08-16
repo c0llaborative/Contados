@@ -2,6 +2,19 @@
 
 Todas las fechas usan America/Bogota.
 
+## 2026-08-16 — Video entregable publicado en el README
+
+### Changed
+
+- El enlace reservado `Video de 1 minuto` del README ahora abre el Short de
+  YouTube entregado por el equipo.
+
+### Verified
+
+- Comprobación local del destino exacto, ausencia del marcador `#`, revisión
+  del diff y `git diff --check`. El contenido y la disponibilidad del video son
+  evidencia reportada por el equipo, no verificada por esta tarea.
+
 ## 2026-08-16 — La conversación deja de olvidar, y WhatsApp recibe el legal design
 
 ### Fixed

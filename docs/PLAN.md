@@ -1,22 +1,50 @@
 # Plan vivo — Contados
 
 - Estado: `PUBLICADO · GATES 0–5 CERRADOS · DESPLEGADO EN VERCEL · CANAL REAL DE WHATSAPP RESPONDIENDO, CON LÍMITE DE DESTINATARIOS`
-- Fecha de estado: 2026-08-16 07:30 (America/Bogota)
+- Fecha de estado: 2026-08-16 (America/Bogota)
 - Owner: equipo de hackathon
 - **Cierre de entregas: domingo 16 a las 09:00.**
 - Repositorio público: <https://github.com/c0llaborative/contados>
-- **Siguiente acción exacta:** terminar el video y subirlo. El despliegue está
-  hecho y el webhook de Meta está conectado; lo que queda del canal real es
-  operativo: agregar a la lista de destinatarios autorizados **cada teléfono**
-  que vaya a probarlo (ver la entrada del 2026-08-16 sobre `131030`). Nada de
-  esto bloquea la entrega: el video se graba con el simulador y ya está
-  verificado.
+- **Siguiente acción exacta:** ninguno para esta entrega. Si el equipo sustituye
+  el video, deberá proporcionar la nueva URL para publicar un commit correctivo.
 - Track: **02 — Justicia** (defendible también en 01; ver
   [ADR 0005](adr/0005-contados.md))
 - Entregables: **repositorio** + **video de 60 segundos**.
 
 Este documento es la fuente de verdad sobre el estado. Si algo aquí contradice
 otro documento, gana este.
+
+## CURRENT · publicación del video entregable
+
+- Problema e impacto: el README público conservaba un marcador `#`, por lo que el
+  jurado no puede abrir el video entregable desde el repositorio.
+- Alcance: reemplazar ese marcador por el enlace de YouTube suministrado por el
+  equipo y actualizar la documentación visible del cambio. No se modifica el
+  video, la aplicación, el despliegue ni las carpetas locales no rastreadas.
+- Seguridad y recuperación: el cambio sólo escribe documentación versionada;
+  puede revertirse con un commit posterior si el enlace cambia.
+- Aceptación: el README contiene exactamente la URL suministrada; el marcador
+  anterior ya no existe; `git diff --check` pasa; el commit contiene sólo los
+  documentos previstos; el push llega a `origin/main`.
+- Verificación prevista: búsquedas locales del enlace y del marcador, revisión
+  del diff, `git diff --check` y comparación del commit local con el remoto.
+- Evidencia externa: la autoría, disponibilidad y contenido del video son
+  reportados por el equipo; esta tarea sólo verifica el vínculo documental.
+
+### 2026-08-16 — Enlace del video incorporado
+
+- Status: `HECHO LOCAL · PUSH PENDIENTE`.
+- Completed: el marcador `#` del enlace `Video de 1 minuto` fue reemplazado por
+  la URL de YouTube suministrada; el changelog se actualizó en el mismo cambio.
+- Verified: inspección local confirma una aparición de la URL exacta en el
+  README y ninguna aparición del marcador anterior.
+- Decisions: conservar la URL completa suministrada, incluido su parámetro
+  `si`, para no alterar el entregable indicado por el equipo.
+- Safety: sólo se modificó documentación rastreada; no se tocó la aplicación,
+  el despliegue, secretos ni las carpetas locales no rastreadas.
+- Remaining/blocker: ejecutar el gate documental, crear el commit y hacer push.
+- Next action: revisión de diff y calidad; luego commit y push a `origin/main`.
+- Owner: Codex.
 
 ## HISTORICAL · alcance autorizado al iniciar esta implementación
 

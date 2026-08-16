@@ -13,7 +13,7 @@ producen la cifra que hoy no existe: **dónde se detiene la gente**. Con ella, u
 coordinador municipal decide a qué barrio mandar primero los ingenieros que le
 faltan — y avisa. El aviso llega al WhatsApp de la familia.
 
-Hac[k]athon CTW 2026 · Track 02, Justicia · [Video de 1 minuto](#) ·
+Hac[k]athon CTW 2026 · Track 02, Justicia · [Video de 1 minuto](https://youtube.com/shorts/PYbe59_fSHk?si=C-H0LVQRh88VOT4-) ·
 Licencia [AGPL-3.0](LICENSE)
 
 ---
