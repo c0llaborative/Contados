@@ -273,6 +273,76 @@ body {
   text-decoration: underline;
 }
 
+/* ── Compositor ───────────────────────────────────────────────────
+   Va dentro del teléfono. Tenerlo fuera rompía la ilusión: en WhatsApp
+   la caja de escribir es parte del chat, no un formulario aparte.
+   ───────────────────────────────────────────────────────────────── */
+
+.wa-compositor {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.45rem;
+  padding: 0.5rem 0.55rem;
+  background: #f0f2f5;
+  border-top: 1px solid rgba(11, 20, 26, 0.08);
+}
+
+.wa-entrada {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  border: 0;
+  border-radius: 1.1rem;
+  padding: 0.6rem 0.9rem;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.925rem;
+  line-height: 1.4;
+  max-height: 6rem;
+  color: var(--wa-texto);
+}
+
+.wa-entrada::placeholder {
+  color: #8696a0;
+}
+
+.wa-entrada:focus {
+  outline: none;
+}
+
+.wa-compositor:focus-within .wa-entrada {
+  box-shadow: 0 0 0 2px rgba(11, 125, 111, 0.35);
+}
+
+.wa-enviar {
+  width: 2.6rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #0b7d6f;
+  color: #fff;
+  font-size: 1.05rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.wa-enviar:hover:not(:disabled) {
+  background: #075e54;
+}
+
+.wa-enviar:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.wa-enviar:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 /* ── Nota de voz ──────────────────────────────────────────────────
    La mayoría de la gente no escribe párrafos por WhatsApp: manda
    audios. Que la demo empiece con una nota de voz no es adorno, es el
