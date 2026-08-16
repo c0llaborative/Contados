@@ -60,8 +60,8 @@ export default function Home() {
           className="mt-4 text-[1.0625rem] leading-relaxed"
           style={{ color: 'var(--ink-soft)' }}
         >
-          Para recibir cualquier apoyo hay que pasar cinco compuertas. Casi nadie
-          sabe en cuál está trabado. Cuéntenos qué ha pasado y se lo decimos.
+          Para recibir cualquier apoyo hay que pasar cinco pasos. Casi nadie sabe
+          en cuál va. Cuéntenos qué ha pasado y se lo decimos.
         </p>
       </header>
 
@@ -390,7 +390,7 @@ export default function Home() {
             className="mt-5 inline-block border-b-2 text-[1.0625rem] font-bold"
             style={{ borderColor: 'var(--signal)' }}
           >
-            Ver dónde se está trabando la gente →
+            Ver dónde se detiene la gente →
           </a>
         </section>
       )}

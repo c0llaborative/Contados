@@ -8,21 +8,26 @@ Estado: `CURRENT LOCAL · GATES 0–5 CERRADOS · DESPLIEGUE Y META EN CURSO`
 · Licencia [AGPL-3.0](LICENSE) ([por qué](NOTICE.md))
 · Estado detallado en [`docs/PLAN.md`](docs/PLAN.md)
 
-Para recibir cualquier ayuda tras el terremoto hay que atravesar cinco
-compuertas:
+Para recibir cualquier ayuda tras el terremoto hay que pasar cinco pasos:
 
 **Reporte → Censo → Evaluación técnica → Registro en el RUD → Subsidio**
 
-Nadie le dice a una familia en cuál está trabada. No existe consulta de estado
-por cédula en la UNGRD ni en ninguna de las cinco alcaldías revisadas: todo es
-presencial, sin número de radicado, y el resultado llega «por SMS o listados en
-la alcaldía».
+Nadie le dice a una familia en cuál va. No existe consulta de estado por cédula
+en la UNGRD ni en ninguna de las cinco alcaldías revisadas: todo es presencial,
+sin número de radicado, y el resultado llega «por SMS o listados en la alcaldía».
 
-**Contados** le dice por WhatsApp a la familia en qué compuerta está, qué sigue y
-dónde hacerlo en su municipio, si está en riesgo de quedar excluida y por qué, y
-le genera el único instrumento que sí tiene reloj legal. **Y le avisa cuando algo
-cambia**, en vez de obligarla a entrar a revisar. En agregado y anonimizado,
-produce la cifra que hoy no existe: cuánta gente está detenida en cada paso.
+**Contados es una conversación de WhatsApp.** La persona manda un audio contando
+qué pasó —como le hablaría a un vecino— y recibe cuatro cosas: en qué paso va,
+qué sigue y dónde hacerlo en su municipio, si está en riesgo de quedar por fuera
+y por qué, y el borrador del único instrumento que sí tiene reloj legal. **Y le
+avisa cuando la atención llega a su barrio**, en vez de obligarla a volver a
+preguntar.
+
+En agregado y anonimizado produce la cifra que hoy no existe: dónde se detiene la
+gente. Un coordinador municipal abre el tablero y ve a qué barrio mandar los
+ingenieros primero.
+
+> **El Estado no tiene plazo para censarlo. Usted sí puede ponerle uno.**
 
 ## Un núcleo, tres superficies
 
@@ -30,10 +35,12 @@ produce la cifra que hoy no existe: cuánta gente está detenida en cada paso.
 |---|---|---|---|
 | **WhatsApp** | Damnificado | **Canal principal** | `CURRENT LOCAL`; conexión Meta pendiente |
 | Web `/whatsapp` | Damnificado sin WhatsApp | Misma conversación, mismo handler | `CURRENT` |
-| Web `/` | Damnificado | Captura y compuertas | `CURRENT` |
+| Web `/` | Damnificado | Captura y pasos | `CURRENT` |
 | Web `/tablero` | Coordinador municipal / UNGRD | El agregado. Es el comprador | `CURRENT` |
 
 **WhatsApp es la puerta; la web es el mismo caso visto desde el otro lado.**
+El simulador `/whatsapp` no es una maqueta: invoca **el mismo handler** que el
+webhook de Meta, así que lo que se ve ahí es lo que responde el canal.
 
 > **Convención de estados en este repositorio:** `CURRENT` = construido y
 > verificado. `PLANEADO` = decidido y especificado, todavía sin código. Nada
@@ -56,6 +63,22 @@ real permanece apagado (`WHATSAPP_SEND_ENABLED=false`) hasta una prueba
 autorizada.
 
 Verificación local: `npm test` · `npx tsc --noEmit` · `npm run build`.
+
+### Ver la demostración en un minuto
+
+Con la app corriendo, esto es exactamente lo que se ve en el video:
+
+1. Abra `/whatsapp` y **toque el micrófono**. Suenan dos notas de voz sintéticas
+   y aparece su transcripción; se transcriben de verdad, no están escritas a
+   mano.
+2. Contados responde: en qué paso va, qué hacer y dónde, el riesgo de quedar por
+   fuera, y el borrador del derecho de petición.
+3. Abra `/tablero` **en otra pestaña** —si navega en la misma, la conversación se
+   pierde—, elija el barrio San José y pulse **Notificar en la demo**.
+4. Vuelva al simulador y pulse **Revisar avisos del barrio**. El aviso llega.
+
+Si no hay clave de transcripción configurada, el micrófono no aparece y la
+conversación funciona igual escribiendo el relato.
 
 ## Fuentes de verdad
 
@@ -106,8 +129,17 @@ Dos modelos, cada uno haciendo lo que sabe hacer:
   barato y más rápido que Opus, que importa porque en WhatsApp seis segundos de
   «escribiendo…» se sienten mal. Razonamiento completo en el
   [ADR 0007](docs/adr/0007-modelos-mvp.md).
-- **Transcripción — Groq `whisper-large-v3-turbo`** (`CURRENT LOCAL`; llamada
-  real pendiente). El audio se procesa en memoria y no se escribe a disco.
+- **Transcripción de las notas de voz** (`CURRENT`; verificada con audio
+  sintético). El proveedor es intercambiable con `STT_PROVIDER` y hay un solo
+  punto de transcripción, así que el webhook de Meta y el simulador no pueden
+  divergir. Hoy corre con **Gemini**; Groq `whisper-large-v3-turbo` sigue
+  soportado y fue el primero en pasar la prueba (EV-032). El audio se procesa en
+  memoria y no se escribe a disco.
+
+  > **Límite declarado:** el tier gratuito de Google usa el contenido para
+  > mejorar sus productos. Es admisible con el audio sintético de esta demo y
+  > **no** lo es con la voz real de una persona damnificada. Antes de cualquier
+  > uso real hace falta un tier de pago o equivalente.
 
 El clasificador corre con **structured outputs y schema estricto**
 (`additionalProperties: false`):
@@ -122,10 +154,19 @@ El clasificador corre con **structured outputs y schema estricto**
 4. **Detección de suplantación**, porque hay denuncias verificadas de personas
    haciéndose pasar por funcionarios. Ese mensaje va **primero**.
 
-**En la web**, la voz se transcribe en el navegador (Web Speech API, `es-CO`) y
-el audio no sale del dispositivo. **En WhatsApp eso no es cierto**: la nota de voz
-pasa por Meta y por el proveedor de transcripción, se borra apenas se transcribe,
-y lo decimos así. Ver [`docs/SEGURIDAD.md`](docs/SEGURIDAD.md) regla 12.
+### Dónde va la voz, exactamente
+
+Tres caminos distintos, y conviene no confundirlos:
+
+| Superficie | Qué pasa con el audio |
+|---|---|
+| Web `/` | Se transcribe con la Web Speech API del navegador. **Ojo:** en Chrome esa API envía el audio a servidores de Google; no es transcripción estrictamente local, y decir lo contrario sería falso |
+| Simulador `/whatsapp` | La nota de voz sube al proveedor de transcripción configurado, se procesa en memoria y no se escribe a disco |
+| WhatsApp real | La nota pasa además por Meta antes de llegar al proveedor |
+
+En ningún caso guardamos el audio. Lo que no podemos prometer es que no salga del
+dispositivo, porque en las tres superficies sale. Ver
+[`docs/SEGURIDAD.md`](docs/SEGURIDAD.md) regla 12.
 
 ## La tesis jurídica
 

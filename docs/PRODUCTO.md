@@ -4,9 +4,9 @@ Estado: `CURRENT LOCAL` · integración real con Meta `PENDIENTE` (ver
 [ADR 0006](adr/0006-whatsapp-primero.md))
 
 **Una frase:** Contados le dice por WhatsApp a una familia damnificada en cuál de
-las cinco compuertas de la ruta oficial está trabada, qué sigue y dónde hacerlo,
-si está en riesgo de quedar excluida y por qué, y le genera el único instrumento
-que sí tiene reloj legal.
+los cinco pasos de la ruta oficial va su caso, qué sigue y dónde hacerlo, si está
+en riesgo de quedar por fuera y por qué, y le genera el único instrumento que sí
+tiene reloj legal.
 
 ## Usuario y momento de uso
 

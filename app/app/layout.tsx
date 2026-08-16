@@ -17,7 +17,7 @@ const karla = Karla({
 export const metadata: Metadata = {
   title: 'Contados — ¿en qué va su ayuda?',
   description:
-    'Sepa en cuál paso de la ruta de atención está trabado su hogar tras el terremoto, qué sigue y qué puede hacer hoy.',
+    'Cuente por WhatsApp qué pasó tras el terremoto y sepa en qué paso va su caso, qué sigue y dónde hacerlo en su municipio.',
 };
 
 export const viewport: Viewport = {
