@@ -37,14 +37,14 @@ export const COMPUERTA_LABEL: Record<Compuerta, string> = {
  */
 export const COMPUERTA_EXPLICACION: Record<Compuerta, string> = {
   reporte:
-    'Usted avisó que su vivienda resultó afectada. Reportar no es lo mismo que estar censado: es apenas el primer paso.',
+    'El reporte es el aviso de que una vivienda resultó afectada. Reportar no es lo mismo que estar censado: es apenas el primer paso.',
   censo:
-    'Un funcionario tomó sus datos. Todavía falta que un técnico revise la vivienda; sin esa visita no hay registro en el RUD.',
+    'El censo es el registro de los datos del hogar afectado. Todavía falta que un técnico revise la vivienda; sin esa visita no hay registro en el RUD.',
   evaluacion_tecnica:
-    'Un técnico debe visitar su vivienda y dejar constancia del daño. Esta es la fila más larga: hay muchas más viviendas que ingenieros.',
-  rud: 'Su hogar quedó inscrito en el Registro Único de Damnificados. El RUD es el requisito para las ayudas, pero no las garantiza por sí solo.',
+    'La evaluación técnica es la visita en la que un técnico deja constancia del daño. Esta es la fila más larga: hay muchas más viviendas que ingenieros.',
+  rud: 'El RUD es el Registro Único de Damnificados. Es el requisito para las ayudas, pero no las garantiza por sí solo.',
   subsidio:
-    'Su hogar figura entre los beneficiarios. El aviso suele llegar por mensaje de texto al celular registrado.',
+    'El subsidio es la entrega de la ayuda a los hogares seleccionados. El aviso suele llegar por mensaje de texto al celular registrado.',
 };
 
 /**

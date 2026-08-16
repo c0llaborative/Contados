@@ -126,11 +126,423 @@ body {
   animation: rec 1.1s ease-in-out infinite;
 }
 
+/* ───────────────────────────────────────────────────────────────
+   El teléfono dentro del documento.
+
+   El resto del sitio es papel institucional. Esto no: es la pantalla
+   que la persona realmente tiene en la mano. Se ve deliberadamente
+   ajeno —otra tipografía, otro color, otro material— porque esa es la
+   tesis: el trámite ocurre donde la gente ya está, no en un portal.
+   Paleta tomada de WhatsApp para que se reconozca sin explicación.
+   ─────────────────────────────────────────────────────────────── */
+
+:root {
+  --wa-barra: #075e54;
+  --wa-barra-alta: #0b7d6f;
+  --wa-fondo: #efeae2;
+  --wa-propio: #d9fdd3;
+  --wa-ajeno: #ffffff;
+  --wa-texto: #111b21;
+  --wa-meta: #667781;
+  --wa-check: #53bdeb;
+}
+
+.wa-marco {
+  border: 1px solid var(--rule-strong);
+  border-radius: 14px;
+  overflow: hidden;
+  /* El teléfono se levanta del papel. Sombra larga y suave, no flotante. */
+  box-shadow: 0 1px 1px rgba(23, 27, 36, 0.1), 0 12px 28px -14px rgba(23, 27, 36, 0.45);
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.wa-barra {
+  background: var(--wa-barra);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+}
+
+.wa-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--wa-barra-alta);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-bitter), Georgia, serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.wa-nombre {
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.wa-estado {
+  font-size: 0.76rem;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.wa-hilo {
+  background-color: var(--wa-fondo);
+  /* Garabatos tenues: la textura del fondo de WhatsApp, no un calco. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='190' height='190'%3E%3Cg fill='none' stroke='%23c8bfb2' stroke-width='1.4' opacity='0.5' stroke-linecap='round'%3E%3Ccircle cx='28' cy='30' r='7'/%3E%3Cpath d='M62 22h18v13H70l-4 5v-5h-4z'/%3E%3Cpath d='M104 36l7-12 7 12z'/%3E%3Cpath d='M146 20v16M138 28h16'/%3E%3Cpath d='M20 78h16v11H26l-3 4v-4h-3z'/%3E%3Ccircle cx='74' cy='84' r='6'/%3E%3Cpath d='M108 76l10 10-10 10-10-10z'/%3E%3Cpath d='M150 80c5 0 8 3 8 7s-3 7-8 7-8-3-8-7 3-7 8-7'/%3E%3Cpath d='M30 132l8-13 8 13z'/%3E%3Cpath d='M68 126v15M60 133h16'/%3E%3Ccircle cx='112' cy='134' r='7'/%3E%3Cpath d='M146 126h17v12h-10l-4 5v-5h-3z'/%3E%3Cpath d='M46 168c4-5 10-5 14 0'/%3E%3Cpath d='M120 166l6 6-6 6-6-6z'/%3E%3C/g%3E%3C/svg%3E");
+  padding: 0.9rem 0.7rem 1.1rem;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.wa-burbuja {
+  position: relative;
+  max-width: 85%;
+  padding: 0.4rem 0.6rem 0.28rem;
+  border-radius: 7.5px;
+  font-size: 0.925rem;
+  line-height: 1.42;
+  color: var(--wa-texto);
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+  /* El enlace de la petición es larguísimo: debe partirse, no desbordar. */
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  animation: wa-entra 0.22s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.wa-ajena {
+  background: var(--wa-ajeno);
+  align-self: flex-start;
+  border-top-left-radius: 0;
+}
+
+.wa-propia {
+  background: var(--wa-propio);
+  align-self: flex-end;
+  border-top-right-radius: 0;
+}
+
+/* Las colitas de la burbuja. Triángulos, como en la app real. */
+.wa-ajena::before,
+.wa-propia::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 9px;
+  height: 13px;
+}
+
+.wa-ajena::before {
+  left: -8px;
+  background: var(--wa-ajeno);
+  clip-path: polygon(100% 0, 0 0, 100% 45%);
+}
+
+.wa-propia::before {
+  right: -8px;
+  background: var(--wa-propio);
+  clip-path: polygon(0 0, 100% 0, 0 45%);
+}
+
+.wa-hora {
+  float: right;
+  margin: 0.35rem 0 0 0.5rem;
+  font-size: 0.6875rem;
+  line-height: 1;
+  color: var(--wa-meta);
+  user-select: none;
+}
+
+.wa-check {
+  color: var(--wa-check);
+  letter-spacing: -0.22em;
+  margin-left: 0.18rem;
+}
+
+.wa-enlace {
+  color: #027eb5;
+  text-decoration: underline;
+}
+
+/* ── Legal design dentro de la burbuja ────────────────────────────
+   El diagnóstico llegaba como párrafos densos. Quien lee esto está
+   angustiado, de pie y con prisa: no va a leer, va a buscar. Cada
+   mensaje se reduce a una etiqueta que dice de qué tipo es, un dato
+   grande que se lee de un vistazo, y el detalle debajo.
+   El texto es exactamente el mismo que produce el núcleo; sólo cambia
+   cómo está dispuesto.
+   ───────────────────────────────────────────────────────────────── */
+
+.wa-etiqueta {
+  font-family: var(--font-karla), sans-serif;
+  font-size: 0.625rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.32rem;
+}
+
+.wa-titular {
+  font-family: var(--font-bitter), Georgia, serif;
+  font-weight: 600;
+  font-size: 1.08rem;
+  line-height: 1.22;
+  color: var(--ink);
+  margin-top: 0.18rem;
+}
+
+.wa-detalle {
+  font-size: 0.845rem;
+  line-height: 1.45;
+  color: #4a5261;
+  margin-top: 0.3rem;
+}
+
+/* La fila de cinco pasos, en miniatura. Horizontal aquí —y no en la
+   web— porque dentro del chat sólo se muestran los números, y el
+   nombre del paso va aparte, debajo. */
+.wa-pasos {
+  display: flex;
+  align-items: center;
+  gap: 0.22rem;
+  margin: 0.5rem 0 0.1rem;
+}
+
+.wa-paso {
+  width: 1.32rem;
+  height: 1.32rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-karla), sans-serif;
+  font-size: 0.66rem;
+  font-weight: 700;
+  border: 1.5px solid var(--rule-strong);
+  background: #fff;
+  color: var(--ink-faint);
+}
+
+.wa-paso-hecho {
+  background: var(--done);
+  border-color: var(--done);
+  color: #fff;
+}
+
+.wa-paso-aqui {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(163, 90, 9, 0.18);
+}
+
+.wa-riel {
+  height: 1.5px;
+  flex: 1;
+  background: var(--rule);
+  min-width: 0.28rem;
+}
+
+.wa-riel-hecho {
+  background: var(--done);
+}
+
+/* Una línea destacada: el lugar al que hay que ir, o lo que hay que
+   pedir. Es lo accionable, y por eso es lo único con fondo propio. */
+.wa-accionable {
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-start;
+  margin-top: 0.45rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 5px;
+  background: #f0f4f1;
+  font-size: 0.83rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.wa-accionable-icono {
+  flex-shrink: 0;
+  line-height: 1.45;
+  font-size: 0.9rem;
+}
+
+.wa-alerta {
+  border-left: 3px solid var(--alert);
+  padding-left: 0.55rem;
+}
+
+.wa-alerta .wa-accionable {
+  background: var(--alert-wash);
+}
+
+/* ── Tarjeta del derecho de petición ──────────────────────────────
+   El token cifrado mide cientos de caracteres: pegado crudo era la
+   parte más fea de la demo. WhatsApp ya resuelve esto con su vista
+   previa de enlace, así que el instrumento legal se presenta como una
+   tarjeta. El ámbar del sistema editorial vuelve aquí, para que el
+   único elemento con reloj legal sea también el único acentuado.
+   ───────────────────────────────────────────────────────────────── */
+
+.wa-peticion {
+  display: block;
+  margin: -0.08rem 0 0.3rem;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f7f2e8;
+  border-left: 3px solid var(--signal);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.16s ease, transform 0.16s ease;
+}
+
+.wa-peticion:hover {
+  background: #f2e9d9;
+}
+
+.wa-peticion:active {
+  transform: scale(0.994);
+}
+
+.wa-peticion-cuerpo {
+  padding: 0.55rem 0.7rem 0.6rem;
+}
+
+.wa-peticion-folio {
+  font-family: var(--font-karla), sans-serif;
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--signal);
+}
+
+.wa-peticion-titulo {
+  font-family: var(--font-bitter), Georgia, serif;
+  font-weight: 600;
+  font-size: 0.98rem;
+  line-height: 1.25;
+  color: var(--ink);
+  margin-top: 0.15rem;
+}
+
+.wa-peticion-nota {
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  margin-top: 0.22rem;
+}
+
+.wa-peticion-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-top: 1px solid #e3d8c2;
+  padding: 0.42rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--signal);
+}
+
+/* El reloj: lo único del producto que sí tiene plazo por ley. */
+.wa-peticion-plazo {
+  font-family: var(--font-karla), sans-serif;
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--ink-faint);
+}
+
+/* Los tres puntos de «escribiendo…». */
+.wa-puntos {
+  display: inline-flex;
+  gap: 4px;
+  padding: 0.15rem 0.1rem;
+}
+
+.wa-puntos span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #9aa4ab;
+  animation: wa-latido 1.3s ease-in-out infinite;
+}
+
+.wa-puntos span:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.wa-puntos span:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+@keyframes wa-entra {
+  from {
+    opacity: 0;
+    transform: translateY(7px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes wa-latido {
+  0%,
+  60%,
+  100% {
+    opacity: 0.38;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+/* El cursor que sigue al texto mientras aparece. */
+.wa-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 0.95em;
+  vertical-align: -0.14em;
+  margin-left: 1px;
+  background: var(--wa-meta);
+  animation: wa-parpadeo 0.85s steps(2, start) infinite;
+}
+
+@keyframes wa-parpadeo {
+  to {
+    visibility: hidden;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .lift,
   .here,
-  .rec {
+  .rec,
+  .wa-burbuja,
+  .wa-puntos span,
+  .wa-cursor {
     animation: none;
+  }
+
+  .wa-hilo {
+    scroll-behavior: auto;
   }
 }
 
