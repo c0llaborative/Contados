@@ -1,12 +1,14 @@
 # Plan vivo — Contados
 
-- Estado: `CURRENT LOCAL · GATES 0–5 CERRADOS · GATE 6 EN CURSO`
-- Fecha de estado: 2026-08-16 (America/Bogota)
+- Estado: `PUBLICADO · GATES 0–5 CERRADOS · REPO PUBLICADO · DESPLIEGUE Y META PENDIENTES`
+- Fecha de estado: 2026-08-16 04:30 (America/Bogota)
 - Owner: equipo de hackathon
-- **Tiempo restante: menos de 24 horas.**
-- **Siguiente acción exacta:** Gate 6. Publicar el repositorio y desplegar en
-  Vercel con envíos apagados; la URL HTTPS resultante es lo único que desbloquea
-  el webhook de Meta en Gate 7.
+- **Cierre de entregas: domingo 16 a las 09:00.**
+- Repositorio público: <https://github.com/c0llaborative/contados>
+- **Siguiente acción exacta:** terminar el video y subirlo; en paralelo,
+  desplegar en Vercel para obtener la URL HTTPS que desbloquea el webhook de Meta
+  en Gate 7. El despliegue y Meta son opcionales para la entrega: el video se
+  graba con el simulador y ya está verificado.
 - Track: **02 — Justicia** (defendible también en 01; ver
   [ADR 0005](adr/0005-contados.md))
 - Entregables: **repositorio** + **video de 60 segundos**.
@@ -104,7 +106,8 @@ La decisión completa, con alternativas y consecuencias, está en el
 | Organización del repositorio (`archivo/`) | `CURRENT` | `archivo/` |
 | Núcleo y clasificador Anthropic/OpenAI configurable | `CURRENT LOCAL`, Anthropic aprobado en EV-030 | `app/lib/nucleo/` |
 | Conversación, agrupación y simulador | `CURRENT LOCAL`, pruebas 17/17 y visual móvil aprobada | `app/lib/nucleo/conversacion.ts`, `app/lib/canales/whatsapp/agrupar.ts`, `/whatsapp` |
-| Webhook y STT | `CURRENT LOCAL`, Groq sintético aprobado; Meta pendiente | `/api/whatsapp`, `app/lib/canales/whatsapp/` |
+| Webhook y STT | `CURRENT LOCAL`; proveedor conmutable con `STT_PROVIDER`. Gemini verificado 2026-08-16 (EV-035); Groq aprobado antes (EV-032) y hoy rechazado por su cuenta; Meta pendiente | `/api/whatsapp`, `/api/nota-voz`, `app/lib/canales/whatsapp/` |
+| Notas de voz en el simulador | `CURRENT`, dos audios sintéticos transcritos de verdad | `/api/nota-voz`, `/whatsapp` |
 | Aviso por barrio desde tablero | `CURRENT EN SIMULADOR`, envío real bloqueado | `/api/notificar`, `/tablero` |
 
 ## HISTORICAL · cambios que guiaron esta implementación

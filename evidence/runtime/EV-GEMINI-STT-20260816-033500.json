@@ -1,0 +1,47 @@
+{
+  "evidence_id": "EV-035",
+  "timestamp": "2026-08-16T03:35:00-05:00",
+  "observer": "Codex + Chrome conectado por el equipo",
+  "scope": "Transcripcion de notas de voz con Gemini tras la regresion de Groq, y recorrido completo del simulador",
+  "result": "pass",
+  "provider_switch": {
+    "reason": "La cuenta de Groq respondio 200 en /models y 401 'Invalid API Key' en /chat/completions y /audio/transcriptions, con dos claves distintas. La credencial es genuina y la cuenta esta rechazada para inferencia.",
+    "groq_request_id": "req_01m04s2w1je02rqc3xbqhk15w1",
+    "new_provider": "gemini",
+    "model": "gemini-3.6-flash",
+    "container_note": "Los audios son Ogg Opus y la documentacion de Gemini solo lista Ogg Vorbis; se aceptaron igual."
+  },
+  "transcriptions": {
+    "nota_1_seconds": 9.5,
+    "nota_2_seconds": 3.0,
+    "verbatim_ok": true,
+    "note": "Se comprobo el texto devuelto, no solo el codigo HTTP. Gemini es un LLM haciendo ASR y tiende a corregir; el prompt exige literalidad y temperatura 0."
+  },
+  "end_to_end": {
+    "clicks": 1,
+    "bubbles": 8,
+    "audios_played_fully": true,
+    "gate_detected": "censo",
+    "exclusion_alert": "arrendatario",
+    "peticion_card_http": 200,
+    "notify_barrio": "San José",
+    "families_notified": 1,
+    "notice_received_in_simulator": true
+  },
+  "grouping": {
+    "behavior": "Las dos notas se transcriben y se unen en un solo relato antes de clasificar.",
+    "why": "Enviadas por separado, la segunda caia despues de un diagnostico cerrado y la maquina de estados la trataba como caso nuevo, perdiendo la alerta de arrendataria."
+  },
+  "verification": {
+    "tests": "19/19 pass",
+    "typescript": "pass",
+    "next_build": "pass",
+    "routes": 11,
+    "secret_scan_files": 99,
+    "secret_leaks": 0,
+    "markdown_files": 43,
+    "broken_links": 0
+  },
+  "privacy_limit": "El tier gratuito de Google declara que usa el contenido para mejorar sus productos. Admisible con el audio sintetico de esta demostracion; NO admisible con la voz real de una persona damnificada. La funcion esta detras de NOTAS_VOZ_DEMO y requiere un tier de pago o equivalente antes de cualquier uso real.",
+  "interpretation": "Prueba que la transcripcion, la clasificacion, la agrupacion, el enlace de peticion y la notificacion por barrio funcionan de extremo a extremo con audio sintetico en local. No prueba voz humana no sintetica, ni relatos reales, ni Meta conectado, ni multiples instancias, ni produccion."
+}
