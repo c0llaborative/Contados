@@ -273,6 +273,94 @@ body {
   text-decoration: underline;
 }
 
+/* ── Nota de voz ──────────────────────────────────────────────────
+   La mayoría de la gente no escribe párrafos por WhatsApp: manda
+   audios. Que la demo empiece con una nota de voz no es adorno, es el
+   caso de uso real. Debajo va la transcripción, como en la app.
+   ───────────────────────────────────────────────────────────────── */
+
+.wa-nota {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 13rem;
+  padding: 0.15rem 0.1rem 0.1rem;
+}
+
+.wa-play {
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #0b7d6f;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1;
+  padding-left: 2px;
+  transition: background 0.15s ease;
+}
+
+.wa-play:hover {
+  background: #075e54;
+}
+
+.wa-play[data-sonando='true'] {
+  padding-left: 0;
+}
+
+.wa-onda {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  height: 1.5rem;
+  min-width: 0;
+}
+
+.wa-onda span {
+  flex: 1;
+  min-width: 1px;
+  border-radius: 1px;
+  background: #a8b3b8;
+  transition: background 0.1s linear;
+}
+
+.wa-onda span[data-oido='true'] {
+  background: #0b7d6f;
+}
+
+.wa-duracion {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  color: var(--wa-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+/* La transcripción, como el panel que WhatsApp muestra bajo el audio. */
+.wa-transcripcion {
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(11, 20, 26, 0.1);
+  font-size: 0.83rem;
+  line-height: 1.42;
+  color: #3b4a54;
+}
+
+.wa-transcripcion-folio {
+  font-family: var(--font-karla), sans-serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--wa-meta);
+  display: block;
+  margin-bottom: 0.15rem;
+}
+
 /* ── Legal design dentro de la burbuja ────────────────────────────
    El diagnóstico llegaba como párrafos densos. Quien lee esto está
    angustiado, de pie y con prisa: no va a leer, va a buscar. Cada

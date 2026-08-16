@@ -10,7 +10,96 @@ type Chat = {
   /** Porción ya revelada. Igual a `texto` cuando terminó de aparecer. */
   mostrado: string;
   hora: string;
+  /** Si el mensaje se mandó como nota de voz, la URL del audio reproducible. */
+  audio?: string;
 };
+
+/**
+ * Notas de voz de la demostración. Se resuelven al cargar la página probando
+ * varias extensiones, así el equipo puede dejar el archivo en el formato que
+ * tenga sin tocar el código. Si no hay ninguna, la sección no aparece: la demo
+ * escrita sigue funcionando igual.
+ */
+const NOTAS_DEMO = [
+  { id: 'nota-1', etiqueta: 'Nota de voz 1' },
+  { id: 'nota-2', etiqueta: 'Nota de voz 2' },
+];
+const EXTENSIONES = ['ogg', 'opus', 'm4a', 'mp3', 'wav', 'webm'];
+
+function segundosBonitos(total: number) {
+  if (!Number.isFinite(total) || total <= 0) return '0:00';
+  const m = Math.floor(total / 60);
+  const s = Math.floor(total % 60);
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+/**
+ * Reproductor con el aspecto del de WhatsApp. Las barras de la onda son
+ * decorativas y deterministas —no se analiza el audio— pero el avance sí
+ * corresponde a la reproducción real.
+ */
+function NotaDeVoz({ src }: { src: string }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [sonando, setSonando] = useState(false);
+  const [avance, setAvance] = useState(0);
+  const [duracion, setDuracion] = useState(0);
+
+  const barras = 34;
+  const alturas = Array.from({ length: barras }, (_, i) => {
+    // Patrón fijo: se ve como voz sin depender de analizar la señal.
+    const onda = Math.sin(i * 1.7) * Math.cos(i * 0.6) * 0.5 + 0.5;
+    return 28 + onda * 62;
+  });
+
+  function alternar() {
+    const el = audioRef.current;
+    if (!el) return;
+    if (el.paused) void el.play();
+    else el.pause();
+  }
+
+  return (
+    <div className="wa-nota">
+      <audio
+        ref={audioRef}
+        src={src}
+        preload="metadata"
+        onPlay={() => setSonando(true)}
+        onPause={() => setSonando(false)}
+        onEnded={() => {
+          setSonando(false);
+          setAvance(0);
+        }}
+        onLoadedMetadata={(e) => setDuracion(e.currentTarget.duration)}
+        onTimeUpdate={(e) => {
+          const el = e.currentTarget;
+          setAvance(el.duration > 0 ? el.currentTime / el.duration : 0);
+        }}
+      />
+      <button
+        type="button"
+        className="wa-play"
+        data-sonando={sonando}
+        onClick={alternar}
+        aria-label={sonando ? 'Pausar nota de voz' : 'Reproducir nota de voz'}
+      >
+        {sonando ? '❚❚' : '▶'}
+      </button>
+      <div className="wa-onda" aria-hidden="true">
+        {alturas.map((altura, i) => (
+          <span
+            key={i}
+            data-oido={i / barras <= avance}
+            style={{ height: `${altura}%` }}
+          />
+        ))}
+      </div>
+      <span className="wa-duracion">
+        {segundosBonitos(sonando || avance > 0 ? duracion * (1 - avance) : duracion)}
+      </span>
+    </div>
+  );
+}
 
 /** Duración objetivo de la aparición de un mensaje, en milisegundos. */
 const REVELADO_MS = 900;
@@ -223,9 +312,38 @@ export default function SimuladorWhatsApp() {
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [notas, setNotas] = useState<{ id: string; etiqueta: string; src: string }[]>([]);
+  const [notasUsadas, setNotasUsadas] = useState<string[]>([]);
+
   const hilo = useRef<HTMLDivElement>(null);
   const cola = useRef<string[]>([]);
   const drenando = useRef(false);
+
+  // Descubre qué notas de la demo existen y en qué formato quedaron.
+  useEffect(() => {
+    let vigente = true;
+    (async () => {
+      const encontradas: { id: string; etiqueta: string; src: string }[] = [];
+      for (const nota of NOTAS_DEMO) {
+        for (const ext of EXTENSIONES) {
+          const src = `/demo/${nota.id}.${ext}`;
+          try {
+            const r = await fetch(src, { method: 'HEAD' });
+            if (r.ok) {
+              encontradas.push({ ...nota, src });
+              break;
+            }
+          } catch {
+            // Un formato que no está no es un error: se prueba el siguiente.
+          }
+        }
+      }
+      if (vigente) setNotas(encontradas);
+    })();
+    return () => {
+      vigente = false;
+    };
+  }, []);
 
   // Seguir el final del hilo mientras el texto aparece, como en la app real.
   useEffect(() => {
@@ -326,6 +444,59 @@ export default function SimuladorWhatsApp() {
     }
   }
 
+  /**
+   * Manda una nota de voz de verdad: el archivo va a Groq, vuelve la
+   * transcripción y esa transcripción entra a la misma conversación que el
+   * texto escrito. No hay texto prefabricado en este camino.
+   */
+  async function enviarNota(nota: { id: string; etiqueta: string; src: string }) {
+    if (cargando) return;
+    setCargando(true);
+    setError(null);
+    setNotasUsadas((actual) => [...actual, nota.id]);
+    setChat((actual) => [
+      ...actual,
+      { de: 'persona', texto: '', mostrado: '', hora: horaCorta(), audio: nota.src },
+    ]);
+    try {
+      const archivo = await fetch(nota.src).then((r) => r.blob());
+      const form = new FormData();
+      form.set('audio', archivo, `${nota.id}.ogg`);
+      form.set('sesionId', sesion.current);
+      form.set('municipio', municipio);
+      form.set('barrio', barrio);
+
+      const response = await fetch('/api/nota-voz', { method: 'POST', body: form });
+      const data = (await response.json()) as {
+        mensajes?: string[];
+        transcripcion?: string;
+        error?: string;
+      };
+      if (!response.ok) throw new Error(data.error || 'No pudimos transcribir la nota.');
+
+      // La transcripción se pega bajo la burbuja del audio, como en WhatsApp.
+      const dicho = data.transcripcion ?? '';
+      setChat((actual) => {
+        const copia = [...actual];
+        for (let i = copia.length - 1; i >= 0; i--) {
+          if (copia[i].audio === nota.src) {
+            copia[i] = { ...copia[i], texto: dicho, mostrado: dicho };
+            break;
+          }
+        }
+        return copia;
+      });
+
+      cola.current.push(...(data.mensajes ?? []));
+      void drenarCola();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No hay conexión.');
+      setNotasUsadas((actual) => actual.filter((id) => id !== nota.id));
+    } finally {
+      setCargando(false);
+    }
+  }
+
   return (
     <main className="mx-auto min-h-screen max-w-[38rem] px-5 pb-24 pt-8">
       <p className="folio">Contados · Simulador de WhatsApp</p>
@@ -391,8 +562,20 @@ export default function SimuladorWhatsApp() {
               item.mostrado.length < item.texto.length && !esEstructurado(item.texto);
             return (
               <div key={index} className={`wa-burbuja ${propia ? 'wa-propia' : 'wa-ajena'}`}>
-                <Contenido texto={item.texto} mostrado={item.mostrado} />
-                {escribiendoAun && <i className="wa-cursor" />}
+                {item.audio ? (
+                  <>
+                    <NotaDeVoz src={item.audio} />
+                    {item.texto && (
+                      <p className="wa-transcripcion">
+                        <span className="wa-transcripcion-folio">Transcripción</span>
+                        {item.texto}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <Contenido texto={item.texto} mostrado={item.mostrado} />
+                )}
+                {escribiendoAun && !item.audio && <i className="wa-cursor" />}
                 <span className="wa-hora">
                   {item.hora}
                   {propia && (
@@ -421,6 +604,28 @@ export default function SimuladorWhatsApp() {
         <p className="mt-3" style={{ color: 'var(--alert)' }}>
           {error}
         </p>
+      )}
+
+      {notas.length > 0 && (
+        <div className="mt-4 border-2 p-4" style={{ borderColor: 'var(--rule-strong)' }}>
+          <p className="folio">Mandar una nota de voz</p>
+          <p className="mt-1 text-[0.875rem]" style={{ color: 'var(--ink-soft)' }}>
+            Se transcribe de verdad con Groq y entra a la misma conversación que el texto.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {notas.map((nota) => (
+              <button
+                key={nota.id}
+                type="button"
+                className="border-2 px-4 py-2 text-[0.9375rem] font-bold disabled:opacity-35"
+                disabled={cargando || notasUsadas.includes(nota.id)}
+                onClick={() => void enviarNota(nota)}
+              >
+                🎤 {nota.etiqueta}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
 
       <textarea
